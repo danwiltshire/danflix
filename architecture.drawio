@@ -1,6 +1,6 @@
-<mxfile modified="2020-06-05T17:48:30.305Z" host="app.diagrams.net" agent="5.0 (Macintosh)" etag="Q1Hexh6PotoZYyiFYQ1H" version="13.1.14" type="github">
+<mxfile modified="2020-06-05T18:03:56.512Z" host="app.diagrams.net" agent="5.0 (Macintosh)" etag="XW85rCtBAsZ2TNoIZl0-" version="13.1.14" type="github">
   <diagram id="Ht1M8jgEwFfnCIfOTk4-" name="Page-1">
-    <mxGraphModel dx="2066" dy="1191" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1059" dy="890" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -14,37 +14,10 @@
           <mxGeometry x="56.5" y="114.5" width="250" height="20" as="geometry" />
         </mxCell>
         <mxCell id="-QjtrjUzRDEMRZ5MF8oH-49" value="On-demand streaming" style="text;html=1;resizable=0;points=[];autosize=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=16;fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="84.5" y="164.5" width="190" height="20" as="geometry" />
+          <mxGeometry x="52.5" y="164.5" width="190" height="20" as="geometry" />
         </mxCell>
         <mxCell id="SCVMTBWpLvtzJIhz15lM-1" value="" style="line;strokeWidth=2;html=1;fontSize=14;" parent="1" vertex="1">
-          <mxGeometry x="52.5" y="139.5" width="1060" height="10" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-3" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EAEDED;fontSize=22;fontColor=#FFFFFF;strokeColor=none;labelBackgroundColor=none;" parent="1" vertex="1">
-          <mxGeometry x="1151" y="51" width="539" height="529" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-4" value="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#007CBD;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=22;labelBackgroundColor=none;" parent="1" vertex="1">
-          <mxGeometry x="1169" y="63" width="40" height="38" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-5" value="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#007CBD;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=22;labelBackgroundColor=none;" parent="1" vertex="1">
-          <mxGeometry x="1167.5" y="185" width="40" height="38" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-6" value="3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#007CBD;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=22;labelBackgroundColor=none;" parent="1" vertex="1">
-          <mxGeometry x="1167.5" y="305" width="40" height="38" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-7" value="4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#007CBD;strokeColor=none;fontColor=#FFFFFF;fontStyle=1;fontSize=22;labelBackgroundColor=none;" parent="1" vertex="1">
-          <mxGeometry x="1167.5" y="419" width="40" height="38" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-13" value="Static web content." style="text;html=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=14;labelBackgroundColor=none;whiteSpace=wrap;" parent="1" vertex="1">
-          <mxGeometry x="1220.5" y="62.5" width="449" height="118" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-14" value="Get Media will attempt to return the requested video." style="text;html=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=14;labelBackgroundColor=none;whiteSpace=wrap;" parent="1" vertex="1">
-          <mxGeometry x="1219.5" y="185.5" width="450" height="115" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-15" value="&lt;div&gt;Media metadata will contain the content available in on-premise storage and in the Cached Media Storage bucket.&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Metadata includes the content name, season-child relationships, thumbnails, watched status, and the media URL regardless of on-prem or Cached Media Storage&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=14;labelBackgroundColor=none;whiteSpace=wrap;" parent="1" vertex="1">
-          <mxGeometry x="1219.5" y="303.5" width="450" height="117" as="geometry" />
-        </mxCell>
-        <mxCell id="7OVz4w7n9kzEPWy-4BBC-16" value="Contains a limited number of video files ready for on-demand playback." style="text;html=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=14;labelBackgroundColor=none;whiteSpace=wrap;" parent="1" vertex="1">
-          <mxGeometry x="1219.5" y="419.5" width="450" height="121" as="geometry" />
+          <mxGeometry x="52.5" y="139.5" width="687.5" height="10" as="geometry" />
         </mxCell>
         <mxCell id="xlu-m_gCkx2zm2VbWauh-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="xlu-m_gCkx2zm2VbWauh-2" target="xlu-m_gCkx2zm2VbWauh-5">
           <mxGeometry relative="1" as="geometry" />
