@@ -1,6 +1,6 @@
-<mxfile modified="2020-06-05T18:03:56.512Z" host="app.diagrams.net" agent="5.0 (Macintosh)" etag="XW85rCtBAsZ2TNoIZl0-" version="13.1.14" type="github">
+<mxfile modified="2020-06-05T20:02:56.946Z" host="app.diagrams.net" agent="5.0 (Macintosh)" etag="QqxYDJj6JVgYgyf7H8Dd" version="13.1.14" type="github">
   <diagram id="Ht1M8jgEwFfnCIfOTk4-" name="Page-1">
-    <mxGraphModel dx="1059" dy="890" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1059" dy="701" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -58,6 +58,9 @@
         <mxCell id="xlu-m_gCkx2zm2VbWauh-57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="xlu-m_gCkx2zm2VbWauh-27" target="xlu-m_gCkx2zm2VbWauh-52">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="xlu-m_gCkx2zm2VbWauh-63" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="xlu-m_gCkx2zm2VbWauh-27" target="xlu-m_gCkx2zm2VbWauh-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="xlu-m_gCkx2zm2VbWauh-27" value="S3 bucket&lt;div&gt;Cached Media Storage&lt;br&gt;&lt;/div&gt;" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.bucket;fillColor=#E05243;gradientColor=none;labelPosition=center;" vertex="1" parent="1">
           <mxGeometry x="460.83000000000004" y="533.5" width="80" height="80" as="geometry" />
         </mxCell>
@@ -89,6 +92,18 @@
         </mxCell>
         <mxCell id="xlu-m_gCkx2zm2VbWauh-52" value="&lt;div&gt;Database&lt;/div&gt;&lt;div&gt;Media Metadata&lt;br&gt;&lt;/div&gt;" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.rds;fillColor=#2E73B8;gradientColor=none;" vertex="1" parent="1">
           <mxGeometry x="464.67" y="700" width="72" height="81" as="geometry" />
+        </mxCell>
+        <mxCell id="xlu-m_gCkx2zm2VbWauh-64" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="xlu-m_gCkx2zm2VbWauh-61" target="xlu-m_gCkx2zm2VbWauh-62">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="xlu-m_gCkx2zm2VbWauh-61" value="&lt;div&gt;AWS Lambda&lt;/div&gt;&lt;div&gt;Watch Folder&lt;/div&gt;" style="outlineConnect=0;dashed=0;verticalLabelPosition=middle;verticalAlign=middle;align=left;html=1;shape=mxgraph.aws3.lambda_function;fillColor=#F58534;gradientColor=none;labelPosition=right;" vertex="1" parent="1">
+          <mxGeometry x="660.5" y="533.5" width="80.5" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="xlu-m_gCkx2zm2VbWauh-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="xlu-m_gCkx2zm2VbWauh-62" target="xlu-m_gCkx2zm2VbWauh-52">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="xlu-m_gCkx2zm2VbWauh-62" value="&lt;div&gt;AWS Lambda&lt;/div&gt;&lt;div&gt;Publish&lt;/div&gt;" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.lambda_function;fillColor=#F58534;gradientColor=none;labelPosition=center;" vertex="1" parent="1">
+          <mxGeometry x="660.5" y="700.5" width="80.5" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
