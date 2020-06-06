@@ -1,4 +1,4 @@
-<mxfile modified="2020-06-06T07:14:32.425Z" host="app.diagrams.net" agent="5.0 (Macintosh)" etag="ZHzsitnKaABIotjBUf8L" version="13.1.14" type="github">
+<mxfile modified="2020-06-06T07:33:26.422Z" host="app.diagrams.net" agent="5.0 (Macintosh)" etag="_0ldYN8dUNLmWre-A4Un" version="13.1.14" type="github">
   <diagram id="Ht1M8jgEwFfnCIfOTk4-" name="Page-1">
     <mxGraphModel dx="2306" dy="1191" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
@@ -445,7 +445,7 @@
           <mxGeometry x="1795" y="330" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="h_c8O7ARUcEgb2CHM1DI-25" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="2070" y="30" width="920" height="680" as="geometry" />
+          <mxGeometry x="2070" y="30" width="1360" height="680" as="geometry" />
         </mxCell>
         <mxCell id="h_c8O7ARUcEgb2CHM1DI-26" value="Application Media Logic" style="text;html=1;resizable=0;points=[];autosize=1;align=center;verticalAlign=top;spacingTop=-4;fontSize=16;fontStyle=1" vertex="1" parent="1">
           <mxGeometry x="2135" y="50" width="200" height="20" as="geometry" />
@@ -553,6 +553,40 @@
         </mxCell>
         <mxCell id="h_c8O7ARUcEgb2CHM1DI-69" value="Stop" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="2750.94" y="593" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-74" value="Choosing Item Logic" style="text;html=1;resizable=0;points=[];autosize=1;align=center;verticalAlign=top;spacingTop=-4;fontSize=16;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="3070" y="50" width="170" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-77" value="Uncached (greyed out)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="h_c8O7ARUcEgb2CHM1DI-75">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="3155" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-79" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="h_c8O7ARUcEgb2CHM1DI-75" target="h_c8O7ARUcEgb2CHM1DI-78">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-75" value="Cache status" style="rhombus;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="3084.06" y="90" width="141.88" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-78" value="Start stream" style="rounded=0;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="3290" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-83" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="h_c8O7ARUcEgb2CHM1DI-80" target="h_c8O7ARUcEgb2CHM1DI-78">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-84" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="h_c8O7ARUcEgb2CHM1DI-83">
+          <mxGeometry x="-0.8031" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-87" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="h_c8O7ARUcEgb2CHM1DI-80" target="h_c8O7ARUcEgb2CHM1DI-86">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-80" value="&lt;div&gt;Check again:&lt;/div&gt;&lt;div&gt;Item cached in S3?&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="3084.06" y="220" width="141.88" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="h_c8O7ARUcEgb2CHM1DI-86" value="Run Ingest Routine" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="3095" y="350" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
