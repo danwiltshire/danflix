@@ -32,6 +32,7 @@ resource "aws_resourcegroups_group" "danflix-rg" {
   }
 }
 
+# TODO: See aws_iam_policy_document for this.
 resource "aws_iam_role" "danflix-iam-role-lambda" {
   name = "danflix-${var.environment}-iam-role-lambda"
 
@@ -55,6 +56,7 @@ resource "aws_iam_role" "danflix-iam-role-lambda" {
   }
 }
 
+# TODO: See aws_iam_policy_document for this.
 resource "aws_iam_policy" "danflix-iam-policy-storage-media" {
   name = "danflix-${var.environment}-iam-policy-storage-media"
 
@@ -88,6 +90,84 @@ resource "aws_iam_role_policy_attachment" "danflix-iam-attach-lambda-storage" {
 resource "aws_s3_bucket" "danflix-storage-media" {
   bucket = "danflix-${var.environment}-storage-media"
   acl    = "private"
+
+  tags = {
+    Environment = "${var.environment}"
+  }
+}
+
+resource "aws_s3_bucket" "danflix-storage-frontend" {
+  bucket = "danflix-${var.environment}-storage-frontend"
+  acl    = "private"
+
+  tags = {
+    Environment = "${var.environment}"
+  }
+}
+
+data "aws_iam_policy_document" "danflix-iam-policy-storage-frontend" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.danflix-storage-frontend.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.danflix-cloudfront-frontend-origin_access_identity.iam_arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "danflix-storage-frontend-policy" {
+  bucket = aws_s3_bucket.danflix-storage-frontend.id
+  policy = data.aws_iam_policy_document.danflix-iam-policy-storage-frontend.json
+}
+
+resource "aws_cloudfront_origin_access_identity" "danflix-cloudfront-frontend-origin_access_identity" {
+}
+
+resource "aws_cloudfront_distribution" "danflix-cloudfront-frontend" {
+  origin {
+    domain_name = aws_s3_bucket.danflix-storage-frontend.bucket_regional_domain_name
+    origin_id   = "danflix-${var.environment}-storage-frontend"
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.danflix-cloudfront-frontend-origin_access_identity.cloudfront_access_identity_path
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "danflix-${var.environment}-storage-frontend"
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+    compress               = "true"
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
 
   tags = {
     Environment = "${var.environment}"
