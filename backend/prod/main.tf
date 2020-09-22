@@ -93,3 +93,45 @@ resource "aws_s3_bucket" "danflix-storage-media" {
     Environment = "${var.environment}"
   }
 }
+
+
+# TODO: Need a better way of managing Lambda function code
+data "archive_file" "danflix-lambda-code-getPresignedURL" {
+  type        = "zip"
+  output_path = "/tmp/danflix-lambda-code-getPresignedURL.zip"
+  source {
+    content  = <<EOF
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
+
+exports.handler = async (event) => {
+  const url = await s3.getSignedUrlPromise('getObject', {
+  Bucket: 'danflix-onprem',
+  Key: 'index.html',
+  Expires: 5,
+  }).catch((err) => console.error(err));
+  if ( url ) {
+    const response = {
+        statusCode: 200,
+        body: url,
+    };
+    return response;
+  }
+}
+EOF
+    filename = "index.js"
+  }
+}
+
+resource "aws_lambda_function" "danflix-lambda-function-getPresignedURL" {
+  filename         = data.archive_file.danflix-lambda-code-getPresignedURL.output_path
+  source_code_hash = data.archive_file.danflix-lambda-code-getPresignedURL.output_base64sha256
+  function_name    = "danflix-${var.environment}-lambda-function-getPresignedURL"
+  role             = aws_iam_role.danflix-iam-role-lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs12.x"
+
+  tags = {
+    Environment = "${var.environment}"
+  }
+}
