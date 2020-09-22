@@ -139,6 +139,10 @@ resource "aws_lambda_function" "danflix-lambda-function-getPresignedURL" {
 resource "aws_apigatewayv2_api" "danflix-api" {
   name          = "danflix-${var.environment}-api"
   protocol_type = "HTTP"
+
+  tags = {
+    Environment = "${var.environment}"
+  }
 }
 
 resource "aws_apigatewayv2_route" "danflix-api-route-getPresignedURL" {
@@ -158,4 +162,20 @@ resource "aws_apigatewayv2_stage" "danflix-api-stage-default" {
   api_id      = aws_apigatewayv2_api.danflix-api.id
   name        = "danflix-${var.environment}-default"
   auto_deploy = true
+
+  tags = {
+    Environment = "${var.environment}"
+  }
+}
+
+resource "aws_apigatewayv2_authorizer" "danflix-api-authorizer" {
+  api_id           = aws_apigatewayv2_api.danflix-api.id
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+  name             = "danflix-${var.environment}-authorizer"
+
+  jwt_configuration {
+    audience = ["${aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url}"]
+    issuer   = var.authorizer_issuer_url
+  }
 }
