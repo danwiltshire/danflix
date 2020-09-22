@@ -32,6 +32,7 @@ resource "aws_resourcegroups_group" "danflix-rg" {
   }
 }
 
+# TODO: See aws_iam_policy_document for this.
 resource "aws_iam_role" "danflix-iam-role-lambda" {
   name = "danflix-${var.environment}-iam-role-lambda"
 
@@ -55,6 +56,7 @@ resource "aws_iam_role" "danflix-iam-role-lambda" {
   }
 }
 
+# TODO: See aws_iam_policy_document for this.
 resource "aws_iam_policy" "danflix-iam-policy-storage-media" {
   name = "danflix-${var.environment}-iam-policy-storage-media"
 
