@@ -94,6 +94,15 @@ resource "aws_s3_bucket" "danflix-storage-media" {
   }
 }
 
+resource "aws_s3_bucket" "danflix-storage-frontend" {
+  bucket = "danflix-${var.environment}-storage-frontend"
+  acl    = "private"
+
+  tags = {
+    Environment = "${var.environment}"
+  }
+}
+
 
 # TODO: Need a better way of managing Lambda function code
 data "archive_file" "danflix-lambda-code-get-presignedurl" {
