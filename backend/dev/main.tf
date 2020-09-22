@@ -135,3 +135,27 @@ resource "aws_lambda_function" "danflix-lambda-function-getPresignedURL" {
     Environment = "${var.environment}"
   }
 }
+
+resource "aws_apigatewayv2_api" "danflix-api" {
+  name          = "danflix-${var.environment}-api"
+  protocol_type = "HTTP"
+}
+
+resource "aws_apigatewayv2_route" "danflix-api-route-getPresignedURL" {
+  api_id    = aws_apigatewayv2_api.danflix-api.id
+  route_key = "GET /getpresignedurl"
+  target    = "integrations/${aws_apigatewayv2_integration.danflix-api-route-getPresignedURL-integration.id}"
+}
+
+resource "aws_apigatewayv2_integration" "danflix-api-route-getPresignedURL-integration" {
+  api_id             = aws_apigatewayv2_api.danflix-api.id
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST"
+  integration_uri    = aws_lambda_function.danflix-lambda-function-getPresignedURL.invoke_arn
+}
+
+resource "aws_apigatewayv2_stage" "danflix-api-stage-default" {
+  api_id      = aws_apigatewayv2_api.danflix-api.id
+  name        = "danflix-${var.environment}-default"
+  auto_deploy = true
+}
