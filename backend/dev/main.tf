@@ -4,22 +4,12 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
-    auth0 = {
-      source  = "alexkappa/auth0"
-      version = "> 0.8"
-    }
   }
 }
 
 provider "aws" {
   profile = "default"
   region  = "eu-west-2"
-}
-
-provider "auth0" {
-  domain        = env.auth0_domain
-  client_id     = env.auth0_client_id
-  client_secret = env.auth0_client_secret
 }
 
 resource "aws_resourcegroups_group" "danflix-rg" {
