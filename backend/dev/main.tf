@@ -13,8 +13,8 @@ provider "aws" {
 }
 
 provider "auth0" {
-  domain = env.auth0_domain
-  client_id = env.auth0_client_id
+  domain        = env.auth0_domain
+  client_id     = env.auth0_client_id
   client_secret = env.auth0_client_secret
 }
 
