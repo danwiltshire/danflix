@@ -62,32 +62,29 @@ resource "aws_iam_policy" "danflix-iam-policy-storage-media" {
   name = "danflix-${var.environment}-iam-policy-storage-media"
 
   policy = <<EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "ListObjectsInBucket",
-            "Effect": "Allow",
-            "Action": "s3:ListBucket",
-            "Resource": [
-                "arn:aws:s3:::danflix-${var.environment}-storage-media"
-            ]
-        },
-        {
-            "Sid": "GetObjectInBucket",
-            "Effect": "Allow",
-            "Action": "s3:GetObject",
-            "Resource": [
-                "arn:aws:s3:::danflix-${var.environment}-storage-media/*"
-            ]
-        }
-    ]
-  }
+{
+"Version": "2012-10-17",
+"Statement":
+  [
+    {
+    "Sid": "ListObjectsInBucket",
+    "Effect": "Allow",
+    "Action": "s3:ListBucket",
+    "Resource": [ "arn:aws:s3:::danflix-${var.environment}-storage-media" ]
+    },
+    {
+    "Sid": "GetObjectInBucket",
+    "Effect": "Allow",
+    "Action": "s3:GetObject",
+    "Resource": [ "arn:aws:s3:::danflix-${var.environment}-storage-media/*" ]
+    }
+  ]
+}
   EOF
 }
 
 resource "aws_iam_role_policy_attachment" "danflix-iam-attach-lambda-storage" {
-  role       = aws_iam_role.danflix-iam-role-lambda
+  role       = aws_iam_role.danflix-iam-role-lambda.name
   policy_arn = aws_iam_policy.danflix-iam-policy-storage-media.arn
 }
 
