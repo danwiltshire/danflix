@@ -106,9 +106,9 @@ resource "aws_s3_bucket" "danflix-storage-media" {
 
 
 # TODO: Need a better way of managing Lambda function code
-data "archive_file" "danflix-lambda-code-getPresignedURL" {
+data "archive_file" "danflix-lambda-code-get-presignedurl" {
   type        = "zip"
-  output_path = "/tmp/danflix-lambda-code-getPresignedURL.zip"
+  output_path = "/tmp/danflix-lambda-code-get-presignedurl.zip"
   source {
     content  = <<EOF
 const AWS = require('aws-sdk');
@@ -133,10 +133,10 @@ EOF
   }
 }
 
-resource "aws_lambda_function" "danflix-lambda-function-getPresignedURL" {
-  filename         = data.archive_file.danflix-lambda-code-getPresignedURL.output_path
-  source_code_hash = data.archive_file.danflix-lambda-code-getPresignedURL.output_base64sha256
-  function_name    = "danflix-${var.environment}-lambda-function-getPresignedURL"
+resource "aws_lambda_function" "danflix-lambda-function-get-presignedurl" {
+  filename         = data.archive_file.danflix-lambda-code-get-presignedurl.output_path
+  source_code_hash = data.archive_file.danflix-lambda-code-get-presignedurl.output_base64sha256
+  function_name    = "danflix-${var.environment}-lambda-function-get-presignedurl"
   role             = aws_iam_role.danflix-iam-role-lambda.arn
   handler          = "index.handler"
   runtime          = "nodejs12.x"
@@ -155,24 +155,24 @@ resource "aws_apigatewayv2_api" "danflix-api" {
   }
 }
 
-resource "aws_apigatewayv2_route" "danflix-api-route-getPresignedURL" {
+resource "aws_apigatewayv2_route" "danflix-api-route-get-presignedurl" {
   api_id             = aws_apigatewayv2_api.danflix-api.id
-  route_key          = "GET /getpresignedurl"
-  target             = "integrations/${aws_apigatewayv2_integration.danflix-api-route-getPresignedURL-integration.id}"
+  route_key          = "GET /presignedurl"
+  target             = "integrations/${aws_apigatewayv2_integration.danflix-api-route-get-presignedurl-integration.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.danflix-api-authorizer.id
 }
 
-resource "aws_apigatewayv2_integration" "danflix-api-route-getPresignedURL-integration" {
+resource "aws_apigatewayv2_integration" "danflix-api-route-get-presignedurl-integration" {
   api_id             = aws_apigatewayv2_api.danflix-api.id
   integration_type   = "AWS_PROXY"
   integration_method = "POST"
-  integration_uri    = aws_lambda_function.danflix-lambda-function-getPresignedURL.invoke_arn
+  integration_uri    = aws_lambda_function.danflix-lambda-function-get-presignedurl.invoke_arn
 }
 
 resource "aws_apigatewayv2_stage" "danflix-api-stage-default" {
   api_id      = aws_apigatewayv2_api.danflix-api.id
-  name        = "danflix-${var.environment}-default"
+  name        = "$default"
   auto_deploy = true
 
   tags = {
@@ -190,4 +190,8 @@ resource "aws_apigatewayv2_authorizer" "danflix-api-authorizer" {
     audience = ["${aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url}"]
     issuer   = var.authorizer_issuer_url
   }
+}
+
+output "api_invoke_url" {
+  value = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
 }
