@@ -5,7 +5,7 @@ terraform {
       version = "~> 3.0"
     }
     auth0 = {
-      source = "alexkappa/auth0"
+      source  = "alexkappa/auth0"
       version = "> 0.8"
     }
   }
@@ -156,9 +156,11 @@ resource "aws_apigatewayv2_api" "danflix-api" {
 }
 
 resource "aws_apigatewayv2_route" "danflix-api-route-getPresignedURL" {
-  api_id    = aws_apigatewayv2_api.danflix-api.id
-  route_key = "GET /getpresignedurl"
-  target    = "integrations/${aws_apigatewayv2_integration.danflix-api-route-getPresignedURL-integration.id}"
+  api_id             = aws_apigatewayv2_api.danflix-api.id
+  route_key          = "GET /getpresignedurl"
+  target             = "integrations/${aws_apigatewayv2_integration.danflix-api-route-getPresignedURL-integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.danflix-api-authorizer.id
 }
 
 resource "aws_apigatewayv2_integration" "danflix-api-route-getPresignedURL-integration" {
