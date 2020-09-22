@@ -103,10 +103,34 @@ resource "aws_s3_bucket" "danflix-storage-frontend" {
   }
 }
 
+data "aws_iam_policy_document" "danflix-iam-policy-storage-frontend" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.danflix-storage-frontend.arn}/*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.danflix-cloudfront-frontend-origin_access_identity.iam_arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "danflix-storage-frontend-policy" {
+  bucket = aws_s3_bucket.danflix-storage-frontend.id
+  policy = data.aws_iam_policy_document.danflix-iam-policy-storage-frontend.json
+}
+
+resource "aws_cloudfront_origin_access_identity" "danflix-cloudfront-frontend-origin_access_identity" {
+}
+
 resource "aws_cloudfront_distribution" "danflix-cloudfront-frontend" {
   origin {
     domain_name = aws_s3_bucket.danflix-storage-frontend.bucket_regional_domain_name
     origin_id   = "danflix-${var.environment}-storage-frontend"
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.danflix-cloudfront-frontend-origin_access_identity.cloudfront_access_identity_path
+    }
   }
 
   enabled             = true
@@ -126,7 +150,8 @@ resource "aws_cloudfront_distribution" "danflix-cloudfront-frontend" {
       }
     }
 
-    viewer_protocol_policy = "allow-all"
+    compress               = "true"
+    viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
