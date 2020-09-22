@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
+    auth0 = {
+      source = "alexkappa/auth0"
+      version = "> 0.8"
+    }
   }
 }
 
