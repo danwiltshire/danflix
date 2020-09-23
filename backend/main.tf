@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 resource "aws_resourcegroups_group" "danflix-rg" {
-  name = "danflix-${var.environment}"
+  name = "danflix-${terraform.workspace}"
 
   resource_query {
     query = <<JSON
@@ -24,7 +24,7 @@ resource "aws_resourcegroups_group" "danflix-rg" {
   [
     {
       "Key": "Environment",
-      "Values": ["${var.environment}"]
+      "Values": ["${terraform.workspace}"]
     }
   ]
 }
@@ -34,7 +34,7 @@ resource "aws_resourcegroups_group" "danflix-rg" {
 
 # TODO: See aws_iam_policy_document for this.
 resource "aws_iam_role" "danflix-iam-role-lambda" {
-  name = "danflix-${var.environment}-iam-role-lambda"
+  name = "danflix-${terraform.workspace}-iam-role-lambda"
 
   assume_role_policy = <<-EOF
 {
@@ -52,13 +52,13 @@ resource "aws_iam_role" "danflix-iam-role-lambda" {
   EOF
 
   tags = {
-    Environment = "${var.environment}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 # TODO: See aws_iam_policy_document for this.
 resource "aws_iam_policy" "danflix-iam-policy-storage-media" {
-  name = "danflix-${var.environment}-iam-policy-storage-media"
+  name = "danflix-${terraform.workspace}-iam-policy-storage-media"
 
   policy = <<EOF
 {
@@ -69,13 +69,13 @@ resource "aws_iam_policy" "danflix-iam-policy-storage-media" {
     "Sid": "ListObjectsInBucket",
     "Effect": "Allow",
     "Action": "s3:ListBucket",
-    "Resource": [ "arn:aws:s3:::danflix-${var.environment}-storage-media" ]
+    "Resource": [ "arn:aws:s3:::danflix-${terraform.workspace}-storage-media" ]
     },
     {
     "Sid": "GetObjectInBucket",
     "Effect": "Allow",
     "Action": "s3:GetObject",
-    "Resource": [ "arn:aws:s3:::danflix-${var.environment}-storage-media/*" ]
+    "Resource": [ "arn:aws:s3:::danflix-${terraform.workspace}-storage-media/*" ]
     }
   ]
 }
@@ -88,22 +88,22 @@ resource "aws_iam_role_policy_attachment" "danflix-iam-attach-lambda-storage" {
 }
 
 resource "aws_s3_bucket" "danflix-storage-media" {
-  bucket        = "danflix-${var.environment}-storage-media"
+  bucket        = "danflix-${terraform.workspace}-storage-media"
   acl           = "private"
   force_destroy = true
 
   tags = {
-    Environment = "${var.environment}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 resource "aws_s3_bucket" "danflix-storage-frontend" {
-  bucket        = "danflix-${var.environment}-storage-frontend"
+  bucket        = "danflix-${terraform.workspace}-storage-frontend"
   acl           = "private"
   force_destroy = true
 
   tags = {
-    Environment = "${var.environment}"
+    Environment = "${terraform.workspace}"
   }
 }
 
@@ -130,7 +130,7 @@ resource "aws_cloudfront_origin_access_identity" "danflix-cloudfront-frontend-or
 resource "aws_cloudfront_distribution" "danflix-cloudfront-frontend" {
   origin {
     domain_name = aws_s3_bucket.danflix-storage-frontend.bucket_regional_domain_name
-    origin_id   = "danflix-${var.environment}-storage-frontend"
+    origin_id   = "danflix-${terraform.workspace}-storage-frontend"
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.danflix-cloudfront-frontend-origin_access_identity.cloudfront_access_identity_path
@@ -144,7 +144,7 @@ resource "aws_cloudfront_distribution" "danflix-cloudfront-frontend" {
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "danflix-${var.environment}-storage-frontend"
+    target_origin_id = "danflix-${terraform.workspace}-storage-frontend"
 
     forwarded_values {
       query_string = false
@@ -172,7 +172,7 @@ resource "aws_cloudfront_distribution" "danflix-cloudfront-frontend" {
   }
 
   tags = {
-    Environment = "${var.environment}"
+    Environment = "${terraform.workspace}"
   }
 }
 
@@ -208,18 +208,18 @@ EOF
 resource "aws_lambda_function" "danflix-lambda-function-get-presignedurl" {
   filename         = data.archive_file.danflix-lambda-code-get-presignedurl.output_path
   source_code_hash = data.archive_file.danflix-lambda-code-get-presignedurl.output_base64sha256
-  function_name    = "danflix-${var.environment}-lambda-function-get-presignedurl"
+  function_name    = "danflix-${terraform.workspace}-lambda-function-get-presignedurl"
   role             = aws_iam_role.danflix-iam-role-lambda.arn
   handler          = "index.handler"
   runtime          = "nodejs12.x"
 
   tags = {
-    Environment = "${var.environment}"
+    Environment = "${terraform.workspace}"
   }
 }
 
 resource "aws_apigatewayv2_api" "danflix-api" {
-  name          = "danflix-${var.environment}-api"
+  name          = "danflix-${terraform.workspace}-api"
   protocol_type = "HTTP"
 
   cors_configuration {
@@ -228,7 +228,7 @@ resource "aws_apigatewayv2_api" "danflix-api" {
   }
 
   tags = {
-    Environment = "${var.environment}"
+    Environment = "${terraform.workspace}"
   }
 }
 
@@ -253,7 +253,7 @@ resource "aws_apigatewayv2_stage" "danflix-api-stage-default" {
   auto_deploy = true
 
   tags = {
-    Environment = "${var.environment}"
+    Environment = "${terraform.workspace}"
   }
 }
 
@@ -261,10 +261,10 @@ resource "aws_apigatewayv2_authorizer" "danflix-api-authorizer" {
   api_id           = aws_apigatewayv2_api.danflix-api.id
   authorizer_type  = "JWT"
   identity_sources = ["$request.header.Authorization"]
-  name             = "danflix-${var.environment}-authorizer"
+  name             = "danflix-${terraform.workspace}-authorizer"
 
   jwt_configuration {
     audience = ["${aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url}"]
-    issuer   = var.authorizer_issuer_url
+    issuer   = var.jwt_authorizer_issuer_url[terraform.workspace]
   }
 }
