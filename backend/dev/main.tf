@@ -220,6 +220,11 @@ resource "aws_apigatewayv2_api" "danflix-api" {
   name          = "danflix-${var.environment}-api"
   protocol_type = "HTTP"
 
+  cors_configuration {
+    allow_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}"]
+    allow_methods = ["GET"]
+  }
+
   tags = {
     Environment = "${var.environment}"
   }
@@ -264,4 +269,8 @@ resource "aws_apigatewayv2_authorizer" "danflix-api-authorizer" {
 
 output "api_invoke_url" {
   value = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
+}
+
+output "cloudfront_distribution_domain" {
+  value = aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name
 }
