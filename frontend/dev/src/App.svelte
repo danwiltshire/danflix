@@ -1,52 +1,75 @@
 <script>
+	import {
+	Auth0Context,
+	authError,
+	authToken,
+	idToken,
+	isAuthenticated,
+	isLoading,
+	login,
+	logout,
+	userInfo,
+	} from '@dopry/svelte-auth0';
+
 	export let name;
 
-	let promise = getRandomNumber();
-
-	async function getRandomNumber() {
-		const res = await fetch("https://jsonplaceholder.typicode.com/todos/1");
-		const text = await res.text();
-
-		if (res.ok) {
-			return text;
-		} else {
-			throw new Error(text);
-		}
-	}
+	let promise = getPresignedURL();
 
 	function handleClick() {
-		promise = getRandomNumber();
+		promise = getPresignedURL();
 	}
+	
+	async function getPresignedURL() {
+		console.log( 'Attemping fetch...' )
+		const res = await fetch( "https://g1iil5rwc5.execute-api.eu-west-2.amazonaws.com/presignedurl" );
+		const text = await res.text();
 
-	console.log( 'Attemping fetch...' )
-	fetch( 'https://g1iil5rwc5.execute-api.eu-west-2.amazonaws.com/presignedurl' )
-	.then( response => {
-		if ( ! response.ok ) {
-		throw new Error( 'Network response was not ok: ' + response.status );
+		if ( ! res.ok ) {
+			throw new Error( 'Network response was not ok: ' + res.status );
+		} else {
+			console.log( 'Fetch successful, returning...' )
+			return text
 		}
-		return response.blob();
-	})
-	.then( myBlob => {
-		//myImage.src = URL.createObjectURL(myBlob);
-		console.log( myBlob );
-	})
-	.catch( error => {
-		console.error( 'There has been a problem with your fetch operation:', error );
-	});
+	}
 </script>
 
 <main>
+
+	  <Auth0Context
+		domain="dwlab.eu.auth0.com"
+		client_id="AplO6ha5bKxMxKL7f6fXAYtCJtC2NGsa"
+		audience="http://localhost:5000"
+	>
+
+	<button class="btn" on:click|preventDefault='{() => login() }'>Login</button>
+  <button class="btn" on:click|preventDefault='{() => logout() }'>Logout</button>
+  <table>
+    <thead>
+      <tr><th>store</th><th>value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>isLoading</td><td>{$isLoading}</td></tr>
+      <tr><td>isAuthenticated</td><td>{$isAuthenticated}</td></tr>
+      <tr><td>authToken</td><td>{$authToken}</td></tr>
+      <tr><td>idToken</td><td>{$idToken}</td></tr>
+      <tr><td>userInfo</td><td><pre>{JSON.stringify($userInfo, null, 2)}</pre></td></tr>
+      <tr><td>authError</td><td>{$authError}</td></tr>
+    </tbody>
+  </table>
+</Auth0Context>
+
+	  
 	<h1>Hello {name}!</h1>
 	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
 
 	<button on:click={handleClick}>
-	generate random number
+	Get presigned URL
 	</button>
 
 	{#await promise}
 	<p>...waiting</p>
-	{:then number}
-		<p>The number is {number}</p>
+	{:then url}
+		<p>The url is {url}</p>
 	{:catch error}
 		<p style="color: red">{error.message}</p>
 	{/await}
