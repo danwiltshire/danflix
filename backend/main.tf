@@ -88,8 +88,9 @@ resource "aws_iam_role_policy_attachment" "danflix-iam-attach-lambda-storage" {
 }
 
 resource "aws_s3_bucket" "danflix-storage-media" {
-  bucket = "danflix-${var.environment}-storage-media"
-  acl    = "private"
+  bucket        = "danflix-${var.environment}-storage-media"
+  acl           = "private"
+  force_destroy = true
 
   tags = {
     Environment = "${var.environment}"
@@ -97,8 +98,9 @@ resource "aws_s3_bucket" "danflix-storage-media" {
 }
 
 resource "aws_s3_bucket" "danflix-storage-frontend" {
-  bucket = "danflix-${var.environment}-storage-frontend"
-  acl    = "private"
+  bucket        = "danflix-${var.environment}-storage-frontend"
+  acl           = "private"
+  force_destroy = true
 
   tags = {
     Environment = "${var.environment}"
@@ -265,12 +267,4 @@ resource "aws_apigatewayv2_authorizer" "danflix-api-authorizer" {
     audience = ["${aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url}"]
     issuer   = var.authorizer_issuer_url
   }
-}
-
-output "api_invoke_url" {
-  value = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
-}
-
-output "cloudfront_distribution_domain" {
-  value = aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name
 }
