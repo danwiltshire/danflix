@@ -221,7 +221,7 @@ resource "aws_apigatewayv2_api" "danflix-api" {
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}"]
+    allow_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
     allow_methods = ["GET"]
   }
 
