@@ -4,12 +4,35 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
+    auth0 = {
+      source  = "alexkappa/auth0"
+      version = "> 0.8"
+    }
   }
 }
 
 provider "aws" {
   profile = "default"
   region  = "eu-west-2"
+}
+
+provider "auth0" {
+  domain        = var.terraform_auth0_provider["domain"]
+  client_id     = var.terraform_auth0_provider["client_id"]
+  client_secret = var.terraform_auth0_provider["client_secret"]
+}
+
+# https://auth0.com/blog/use-terraform-to-manage-your-auth0-configuration/
+resource "auth0_client" "terraform-secure-express" {
+  name            = "Terraform Secure Express"
+  description     = "App for running Dockerized Express application via Terraform"
+  app_type        = "regular_web"
+  callbacks       = ["http://localhost:3000/callback"]
+  oidc_conformant = true
+
+  jwt_configuration {
+    alg = "RS256"
+  }
 }
 
 resource "aws_resourcegroups_group" "danflix-rg" {
