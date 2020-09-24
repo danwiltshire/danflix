@@ -49,7 +49,7 @@ resource "aws_resourcegroups_group" "danflix-rg" {
     query = <<JSON
 {
 "ResourceTypeFilters":
-  [ "AWS::EC2::Instance" ],
+  [ "AWS::AllSupported" ],
 "TagFilters":
   [
     {
