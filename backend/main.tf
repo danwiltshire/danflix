@@ -218,6 +218,60 @@ resource "aws_lambda_function" "danflix-lambda-function-get-presignedurl" {
   }
 }
 
+# TODO: Need a better way of managing Lambda function code
+data "archive_file" "danflix-lambda-code-get-listobjects" {
+  type        = "zip"
+  output_path = "/tmp/danflix-lambda-code-get-listobjects.zip"
+  source {
+    content  = <<EOF
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({apiVersion: '2006-03-01'});
+
+exports.handler = async (event, context) => {
+
+    var params = { 
+        Bucket: 'danflix-onprem'
+    }
+
+    console.log("Checkpoint 1");
+
+    let s3Objects
+
+    try {
+       s3Objects = await s3.listObjectsV2(params).promise();
+       console.log(s3Objects)
+    } catch (e) {
+       console.log(e)
+    }
+
+
+    console.log("Checkpoint 2");
+
+    // Assuming you're using API Gateway
+    return {
+        statusCode: 200,
+        body: JSON.stringify(s3Objects || {message: 'No objects found in s3 bucket'})
+    }
+
+};
+EOF
+    filename = "index.js"
+  }
+}
+
+resource "aws_lambda_function" "danflix-lambda-function-get-listobjects" {
+  filename         = data.archive_file.danflix-lambda-code-get-listobjects.output_path
+  source_code_hash = data.archive_file.danflix-lambda-code-get-listobjects.output_base64sha256
+  function_name    = "danflix-${terraform.workspace}-lambda-function-get-listobjects"
+  role             = aws_iam_role.danflix-iam-role-lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs12.x"
+
+  tags = {
+    Environment = "${terraform.workspace}"
+  }
+}
+
 resource "aws_apigatewayv2_api" "danflix-api" {
   name          = "danflix-${terraform.workspace}-api"
   protocol_type = "HTTP"
@@ -245,6 +299,21 @@ resource "aws_apigatewayv2_integration" "danflix-api-route-get-presignedurl-inte
   integration_type   = "AWS_PROXY"
   integration_method = "POST"
   integration_uri    = aws_lambda_function.danflix-lambda-function-get-presignedurl.invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "danflix-api-route-get-listobjects" {
+  api_id             = aws_apigatewayv2_api.danflix-api.id
+  route_key          = "GET /listobjects"
+  target             = "integrations/${aws_apigatewayv2_integration.danflix-api-route-get-listobjects-integration.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.danflix-api-authorizer.id
+}
+
+resource "aws_apigatewayv2_integration" "danflix-api-route-get-listobjects-integration" {
+  api_id             = aws_apigatewayv2_api.danflix-api.id
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST"
+  integration_uri    = aws_lambda_function.danflix-lambda-function-get-listobjects.invoke_arn
 }
 
 resource "aws_apigatewayv2_stage" "danflix-api-stage-default" {
