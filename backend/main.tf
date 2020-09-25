@@ -51,9 +51,9 @@ resource "auth0_client" "danflix-auth0-app" {
   is_token_endpoint_ip_header_trusted = true
   token_endpoint_auth_method          = "client_secret_post"
   oidc_conformant                     = false
-  callbacks                           = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
-  web_origins                         = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
-  allowed_logout_urls                 = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
+  callbacks                           = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  web_origins                         = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  allowed_logout_urls                 = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
 }
 
 resource "aws_resourcegroups_group" "danflix-rg" {
