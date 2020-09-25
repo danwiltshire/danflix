@@ -45,15 +45,17 @@ resource "auth0_resource_server" "danflix-auth0-api" {
 
 # The frontend React app uses this as an issuer
 resource "auth0_client" "danflix-auth0-app" {
-  name                                = "danflix-${terraform.workspace}-app"
-  description                         = "Danflix React application"
-  app_type                            = "spa"
-  oidc_conformant                     = true
-  callbacks                           = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
-  web_origins                         = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
-  allowed_logout_urls                 = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  name                       = "danflix-${terraform.workspace}-app"
+  description                = "Danflix React application"
+  app_type                   = "spa"
+  oidc_conformant            = true
+  token_endpoint_auth_method = "none"
+  callbacks                  = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  web_origins                = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  allowed_logout_urls        = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
   jwt_configuration {
-    alg = "RS256"
+    alg                 = "RS256"
+    lifetime_in_seconds = 36000
   }
 }
 
