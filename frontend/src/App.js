@@ -17,7 +17,6 @@ function App() {
       <LoginButton />
       <LogoutButton />
       <Profile />
-      <AWSListObjects />
     </>
   );
 }

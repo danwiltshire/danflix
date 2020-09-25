@@ -9,9 +9,9 @@ const AWSListObjects = () => {
     (async () => {
       try {
         const token = await getAccessTokenSilently({
-          audience: 'https://7njjpyiofg.execute-api.eu-west-2.amazonaws.com/'
+          audience: 'https://ghwwj4hvm4.execute-api.eu-west-2.amazonaws.com/'
         });
-        const response = await fetch('https://7njjpyiofg.execute-api.eu-west-2.amazonaws.com/listobjects', {
+        const response = await fetch('https://ghwwj4hvm4.execute-api.eu-west-2.amazonaws.com/listobjects', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
