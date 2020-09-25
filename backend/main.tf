@@ -23,16 +23,37 @@ provider "auth0" {
 }
 
 # https://auth0.com/blog/use-terraform-to-manage-your-auth0-configuration/
-resource "auth0_client" "terraform-secure-express" {
+/* resource "auth0_client" "terraform-secure-express" {
   name            = "Terraform Secure Express"
-  description     = "App for running Dockerized Express application via Terraform"
   app_type        = "regular_web"
+  description     = "App for running Dockerized Express application via Terraform"
   callbacks       = ["http://localhost:3000/callback"]
   oidc_conformant = true
 
   jwt_configuration {
     alg = "RS256"
   }
+} */
+
+# AWS API Gateway uses this as an authorizer
+resource "auth0_resource_server" "danflix-auth0-api" {
+  name                                            = "danflix-${terraform.workspace}-api"
+  identifier                                      = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
+  signing_alg                                     = "RS256"
+  skip_consent_for_verifiable_first_party_clients = true
+}
+
+# The frontend React app uses this as an issuer
+resource "auth0_client" "danflix-auth0-app" {
+  name                                = "danflix-${terraform.workspace}-app"
+  description                         = "React application"
+  app_type                            = "spa"
+  is_token_endpoint_ip_header_trusted = true
+  token_endpoint_auth_method          = "client_secret_post"
+  oidc_conformant                     = false
+  callbacks                           = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
+  web_origins                         = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
+  allowed_logout_urls                 = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
 }
 
 resource "aws_resourcegroups_group" "danflix-rg" {
@@ -42,7 +63,7 @@ resource "aws_resourcegroups_group" "danflix-rg" {
     query = <<JSON
 {
 "ResourceTypeFilters":
-  [ "AWS::EC2::Instance" ],
+  [ "AWS::AllSupported" ],
 "TagFilters":
   [
     {
@@ -99,6 +120,15 @@ resource "aws_iam_policy" "danflix-iam-policy-storage-media" {
     "Effect": "Allow",
     "Action": "s3:GetObject",
     "Resource": [ "arn:aws:s3:::danflix-${terraform.workspace}-storage-media/*" ]
+    },
+    {
+    "Effect": "Allow",
+    "Action": [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ],
+     "Resource": "*"
     }
   ]
 }
@@ -211,7 +241,7 @@ const s3 = new AWS.S3();
 
 exports.handler = async (event) => {
   const url = await s3.getSignedUrlPromise('getObject', {
-  Bucket: 'danflix-onprem',
+  Bucket: '${aws_s3_bucket.danflix-storage-media.id}',
   Key: 'index.html',
   Expires: 5,
   }).catch((err) => console.error(err));
@@ -241,6 +271,19 @@ resource "aws_lambda_function" "danflix-lambda-function-get-presignedurl" {
   }
 }
 
+# Resolve 500 Server Error
+resource "aws_lambda_permission" "danflix-lambda-policy-get-presignedurl" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.danflix-lambda-function-get-presignedurl.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # The /*/*/* part allows invocation from any stage, method and resource path
+  # within API Gateway REST API. the last one indicates where to send requests to.
+  # see more detail https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html
+  source_arn = "${aws_apigatewayv2_api.danflix-api.execution_arn}/*/*"
+}
+
 # TODO: Need a better way of managing Lambda function code
 data "archive_file" "danflix-lambda-code-get-listobjects" {
   type        = "zip"
@@ -253,7 +296,7 @@ const s3 = new AWS.S3({apiVersion: '2006-03-01'});
 exports.handler = async (event, context) => {
 
     var params = { 
-        Bucket: 'danflix-onprem'
+        Bucket: '${aws_s3_bucket.danflix-storage-media.id}'
     }
 
     console.log("Checkpoint 1");
@@ -295,12 +338,25 @@ resource "aws_lambda_function" "danflix-lambda-function-get-listobjects" {
   }
 }
 
+# Resolve 500 Server Error
+resource "aws_lambda_permission" "danflix-lambda-policy-get-list-objects" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.danflix-lambda-function-get-listobjects.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # The /*/*/* part allows invocation from any stage, method and resource path
+  # within API Gateway REST API. the last one indicates where to send requests to.
+  # see more detail https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway.html
+  source_arn = "${aws_apigatewayv2_api.danflix-api.execution_arn}/*/*"
+}
+
 resource "aws_apigatewayv2_api" "danflix-api" {
   name          = "danflix-${terraform.workspace}-api"
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
+    allow_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
     allow_methods = ["GET"]
   }
 
