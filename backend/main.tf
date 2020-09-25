@@ -35,11 +35,25 @@ provider "auth0" {
   }
 } */
 
+# AWS API Gateway uses this as an authorizer
 resource "auth0_resource_server" "danflix-auth0-api" {
   name                                            = "danflix-${terraform.workspace}-api"
   identifier                                      = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
   signing_alg                                     = "RS256"
   skip_consent_for_verifiable_first_party_clients = true
+}
+
+# The frontend React app uses this as an issuer
+resource "auth0_client" "danflix-auth0-app" {
+  name                                = "danflix-${terraform.workspace}-app"
+  description                         = "React application"
+  app_type                            = "spa"
+  is_token_endpoint_ip_header_trusted = true
+  token_endpoint_auth_method          = "client_secret_post"
+  oidc_conformant                     = false
+  callbacks                           = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
+  web_origins                         = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
+  allowed_logout_urls                 = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
 }
 
 resource "aws_resourcegroups_group" "danflix-rg" {
@@ -342,7 +356,7 @@ resource "aws_apigatewayv2_api" "danflix-api" {
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:5000"]
+    allow_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
     allow_methods = ["GET"]
   }
 
