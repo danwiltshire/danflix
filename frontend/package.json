@@ -12,7 +12,9 @@
     "react-bootstrap": "^1.3.0",
     "react-dom": "^16.13.1",
     "react-json-pretty": "^2.2.0",
-    "react-scripts": "3.4.3"
+    "react-scripts": "3.4.3",
+    "react-videojs-hook": "^1.0.1",
+    "video.js": "^7.8.4"
   },
   "scripts": {
     "start": "PORT=3000 react-scripts start",
@@ -34,5 +36,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "typescript": "^4.0.3"
   }
 }
