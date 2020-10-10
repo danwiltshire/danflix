@@ -31,7 +31,15 @@ var cloudfrontDomainsEndpoint = []struct {
 	{"cloudfront_distribution_domain", "https", "/", 403, "AccessDenied"},
 }
 
-func TestAPIGatewayEndpoints(t *testing.T) {
+func IntiateTerraform(t *testing.T) {
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../",
+	}
+
+	terraform.InitAndApply(t, terraformOptions)
+}
+
+func TestUnauthenticatedAPIGatewayEndpoints(t *testing.T) {
 
 	t.Parallel()
 
@@ -50,7 +58,7 @@ func TestAPIGatewayEndpoints(t *testing.T) {
 
 }
 
-func TestCloudFrontDomainEndpoints(t *testing.T) {
+func TestUnauthenticatedCloudFrontDomainEndpoints(t *testing.T) {
 
 	t.Parallel()
 
