@@ -1,22 +1,16 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 3.0"
-    }
-  }
-}
-
 provider "aws" {
   profile = "default"
   region  = "eu-west-2"
 }
 
+provider "auth0" {
+  domain        = var.auth0_provider_config["domain"]
+  client_id     = var.auth0_provider_config["client_id"]
+  client_secret = var.auth0_provider_config["client_secret"]
+}
+
 module "authentication" {
   source = "./modules/authentication"
-
-  auth0_provider_config   = var.auth0_provider_config
-  auth0_client_id = var.auth0_client_id
 
 /*  auth0_allowed_logout_urls = var.auth0_allowed_logout_urls
   auth0_allowed_web_origins = var.auth0_allowed_web_origins
@@ -41,7 +35,7 @@ resource "aws_resourcegroups_group" "danflix-rg" {
   [
     {
       "Key": "Environment",
-      "Values": ["${terraform.workspace}"]
+      "Values": [terraform.workspace]
     }
   ]
 }
@@ -69,7 +63,7 @@ resource "aws_iam_role" "danflix-iam-role-lambda" {
   EOF
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -119,7 +113,7 @@ resource "aws_s3_bucket" "danflix-storage-media" {
   force_destroy = true
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -129,7 +123,7 @@ resource "aws_s3_bucket" "danflix-storage-frontend" {
   force_destroy = true
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -198,7 +192,7 @@ resource "aws_cloudfront_distribution" "danflix-cloudfront-frontend" {
   }
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -240,7 +234,7 @@ resource "aws_lambda_function" "danflix-lambda-function-get-presignedurl" {
   runtime          = "nodejs12.x"
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -301,7 +295,7 @@ resource "aws_lambda_function" "danflix-lambda-function-get-listobjects" {
   runtime          = "nodejs12.x"
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -328,7 +322,7 @@ resource "aws_apigatewayv2_api" "danflix-api" {
   }
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -368,7 +362,7 @@ resource "aws_apigatewayv2_stage" "danflix-api-stage-default" {
   auto_deploy = true
 
   tags = {
-    Environment = "${terraform.workspace}"
+    Environment = terraform.workspace
   }
 }
 
@@ -379,7 +373,7 @@ resource "aws_apigatewayv2_authorizer" "danflix-api-authorizer" {
   name             = "danflix-${terraform.workspace}-authorizer"
 
   jwt_configuration {
-    audience = ["${aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url}"]
+    audience = [aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url]
     issuer   = var.jwt_authorizer_issuer_url[terraform.workspace]
   }
 }

@@ -1,18 +1,3 @@
-terraform {
-  required_providers {
-    auth0 = {
-      source  = "alexkappa/auth0"
-      version = "> 0.8"
-    }
-  }
-}
-
-provider "auth0" {
-  domain        = var.auth0_provider_config["domain"]
-  client_id     = var.auth0_client_id
-  client_secret = var.auth0_provider_config["client_secret"]
-}
-
 resource "auth0_resource_server" "danflix-auth0-api" {
   name                                            = "danflix-${terraform.workspace}-api"
   identifier                                      = var.auth0_identifier

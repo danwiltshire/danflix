@@ -7,7 +7,3 @@ variable "auth0_provider_config" {
   description = "Terraform Auth0 provider configuration"
   type        = map(string)
 }
-
-variable "auth0_client_id" {
-  type = string
-}
