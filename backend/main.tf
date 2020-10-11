@@ -1,6 +1,8 @@
 provider "aws" {
-  profile = "default"
-  region  = "eu-west-2"
+  profile    = "default"
+  region     = "eu-west-2"
+  access_key = var.aws_provider_config.access_key
+  secret_key = var.aws_provider_config.secret_key
 }
 
 provider "auth0" {
@@ -12,15 +14,15 @@ provider "auth0" {
 module "authentication" {
   source = "./modules/authentication"
 
-/*  auth0_allowed_logout_urls = var.auth0_allowed_logout_urls
+  /*  auth0_allowed_logout_urls = var.auth0_allowed_logout_urls
   auth0_allowed_web_origins = var.auth0_allowed_web_origins
   auth0_callbacks = var.auth0_callbacks
   auth0_identifier = var.auth0_identifier*/
 
   auth0_allowed_logout_urls = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
   auth0_allowed_web_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
-  auth0_callbacks = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
-  auth0_identifier = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
+  auth0_callbacks           = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  auth0_identifier          = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
 }
 
 resource "aws_resourcegroups_group" "danflix-rg" {
