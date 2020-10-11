@@ -3,7 +3,11 @@ variable "jwt_authorizer_issuer_url" {
   type        = map(string)
 }
 
-variable "terraform_auth0_provider" {
+variable "auth0_provider_config" {
   description = "Terraform Auth0 provider configuration"
   type        = map(string)
+}
+
+variable "auth0_client_id" {
+  type = string
 }

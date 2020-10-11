@@ -4,10 +4,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
-    auth0 = {
-      source  = "alexkappa/auth0"
-      version = "> 0.8"
-    }
   }
 }
 
@@ -16,47 +12,21 @@ provider "aws" {
   region  = "eu-west-2"
 }
 
-provider "auth0" {
-  domain        = var.terraform_auth0_provider["domain"]
-  client_id     = var.terraform_auth0_provider["client_id"]
-  client_secret = var.terraform_auth0_provider["client_secret"]
-}
+module "authentication" {
+  source = "./modules/authentication"
 
-# https://auth0.com/blog/use-terraform-to-manage-your-auth0-configuration/
-/* resource "auth0_client" "terraform-secure-express" {
-  name            = "Terraform Secure Express"
-  app_type        = "regular_web"
-  description     = "App for running Dockerized Express application via Terraform"
-  callbacks       = ["http://localhost:3000/callback"]
-  oidc_conformant = true
+  auth0_provider_config   = var.auth0_provider_config
+  auth0_client_id = var.auth0_client_id
 
-  jwt_configuration {
-    alg = "RS256"
-  }
-} */
+/*  auth0_allowed_logout_urls = var.auth0_allowed_logout_urls
+  auth0_allowed_web_origins = var.auth0_allowed_web_origins
+  auth0_callbacks = var.auth0_callbacks
+  auth0_identifier = var.auth0_identifier*/
 
-# AWS API Gateway uses this as an authorizer
-resource "auth0_resource_server" "danflix-auth0-api" {
-  name                                            = "danflix-${terraform.workspace}-api"
-  identifier                                      = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
-  signing_alg                                     = "RS256"
-  skip_consent_for_verifiable_first_party_clients = true
-}
-
-# The frontend React app uses this as an issuer
-resource "auth0_client" "danflix-auth0-app" {
-  name                       = "danflix-${terraform.workspace}-app"
-  description                = "Danflix React application"
-  app_type                   = "spa"
-  oidc_conformant            = true
-  token_endpoint_auth_method = "none"
-  callbacks                  = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
-  web_origins                = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
-  allowed_logout_urls        = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
-  jwt_configuration {
-    alg                 = "RS256"
-    lifetime_in_seconds = 36000
-  }
+  auth0_allowed_logout_urls = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  auth0_allowed_web_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  auth0_callbacks = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
+  auth0_identifier = aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url
 }
 
 resource "aws_resourcegroups_group" "danflix-rg" {
