@@ -35,7 +35,7 @@ resource "aws_resourcegroups_group" "danflix-rg" {
   [
     {
       "Key": "Environment",
-      "Values": [terraform.workspace]
+      "Values": ["${terraform.workspace}"]
     }
   ]
 }
