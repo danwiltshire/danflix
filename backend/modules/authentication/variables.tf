@@ -17,3 +17,8 @@ variable "auth0_identifier" {
   description = "Auth0 identifier"
   type = string
 }
+
+variable "environment" {
+  description = "The environment variable will be used in all supported resource names"
+  type        = string
+}

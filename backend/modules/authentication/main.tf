@@ -1,5 +1,5 @@
 resource "auth0_resource_server" "danflix-auth0-api" {
-  name                                            = "danflix-${terraform.workspace}-api"
+  name                                            = "danflix-${var.environment}-api"
   identifier                                      = var.auth0_identifier
   signing_alg                                     = "RS256"
   skip_consent_for_verifiable_first_party_clients = true
@@ -7,7 +7,7 @@ resource "auth0_resource_server" "danflix-auth0-api" {
 
 # The frontend React app uses this as an issuer
 resource "auth0_client" "danflix-auth0-app" {
-  name                       = "danflix-${terraform.workspace}-app"
+  name                       = "danflix-${var.environment}-app"
   description                = "Danflix React application"
   app_type                   = "spa"
   oidc_conformant            = true

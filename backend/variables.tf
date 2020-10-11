@@ -16,4 +16,9 @@ variable "aws_provider_config" {
 variable "environment" {
   description = "The environment variable will be used in all supported resource names"
   type        = string
+
+  validation {
+    condition     = length(var.environment) > 1
+    error_message = "The environment value must be greater than 1 characters long."
+  }
 }
