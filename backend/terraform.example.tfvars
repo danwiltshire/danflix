@@ -14,3 +14,29 @@ aws_provider_config = {
 }
 
 environment = "prod"
+
+// TODO: cleaner 
+/*provider_configuration = {
+    "prod" = {
+        "aws" = {
+            access_key = "abc"
+            secret_key = "abc123"
+        },
+        "auth0" = {
+            domain        = "auth0.com"
+            client_id     = "abc"
+            client_secret = "abc123"
+        }
+    }
+    "dev" = {
+        "aws" = {
+            access_key = "abc"
+            secret_key = "abc123"
+        },
+        "auth0" = {
+            domain        = "auth0.com"
+            client_id     = "abc"
+            client_secret = "abc123"
+        }
+    }
+}*/
