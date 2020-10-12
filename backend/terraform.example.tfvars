@@ -15,7 +15,8 @@ aws_provider_config = {
 
 environment = "prod"
 
-// TODO: cleaner 
+// TODO: cleaner
+// TODO: move test configuration into here too (DRY)
 /*provider_configuration = {
     "prod" = {
         "aws" = {
