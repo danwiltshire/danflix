@@ -1,14 +1,14 @@
 provider "aws" {
   profile    = "default"
   region     = "eu-west-2"
-  access_key = var.aws_provider_config.access_key
-  secret_key = var.aws_provider_config.secret_key
+  access_key = var.aws_provider_configuration[var.environment]["aws_access_key"]
+  secret_key = var.aws_provider_configuration[var.environment]["aws_secret_key"]
 }
 
 provider "auth0" {
-  domain        = var.auth0_provider_config["domain"]
-  client_id     = var.auth0_provider_config["client_id"]
-  client_secret = var.auth0_provider_config["client_secret"]
+  domain        = var.auth0_provider_configuration[var.environment]["auth0_domain"]
+  client_id     = var.auth0_provider_configuration[var.environment]["auth0_client_id"]
+  client_secret = var.auth0_provider_configuration[var.environment]["auth0_client_secret"]
 }
 
 /*resource "random_string" "random" {
@@ -25,7 +25,7 @@ locals {
 
 module "authentication" {
   source = "./modules/authentication"
-  
+
   auth0_allowed_logout_urls = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
   auth0_allowed_web_origins = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
   auth0_callbacks           = ["https://${aws_cloudfront_distribution.danflix-cloudfront-frontend.domain_name}", "http://localhost:3000"]
@@ -384,6 +384,6 @@ resource "aws_apigatewayv2_authorizer" "danflix-api-authorizer" {
 
   jwt_configuration {
     audience = [aws_apigatewayv2_stage.danflix-api-stage-default.invoke_url]
-    issuer   = var.jwt_authorizer_issuer_url[var.environment]
+    issuer   = "https://${var.auth0_provider_configuration[var.environment]["auth0_domain"]}/"
   }
 }

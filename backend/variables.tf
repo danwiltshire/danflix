@@ -1,16 +1,16 @@
-variable "jwt_authorizer_issuer_url" {
-  description = "The JWT authorizer issuer URL"
-  type        = map(string)
+variable "auth0_provider_configuration" {
+  type = map(object({
+    auth0_domain        = string
+    auth0_client_id     = string
+    auth0_client_secret = string
+  }))
 }
 
-variable "auth0_provider_config" {
-  description = "Terraform Auth0 provider configuration"
-  type        = map(string)
-}
-
-variable "aws_provider_config" {
-  description = "Terraform AWS provider configuration"
-  type        = map(string)
+variable "aws_provider_configuration" {
+  type = map(object({
+    aws_access_key = string
+    aws_secret_key = string
+  }))
 }
 
 variable "environment" {
