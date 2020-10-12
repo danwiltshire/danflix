@@ -12,8 +12,6 @@ verifier:
   systems:
     - name: basic
       backend: local
-      controls:
-        - url_check
 
 platforms:
   - name: terraform
