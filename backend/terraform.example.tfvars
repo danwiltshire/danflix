@@ -1,3 +1,4 @@
+// TODO: Remove this, use string interpolation to use auth0=>domain.
 jwt_authorizer_issuer_url = {
   prod = "https://domain.auth0.com/"
 }
