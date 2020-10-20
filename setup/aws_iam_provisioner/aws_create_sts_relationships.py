@@ -1,3 +1,13 @@
+'''
+Create AWS account relationships using AWS STS assume role
+
+Prerequisites:
+- AWS credentials must be configured either as environment variables or ~/.aws/credentials
+
+Usage:
+python3 aws_create_sts_relationships.py [parent_account_id] [parent_account_user_name]
+'''
+
 import os
 import uuid
 import argparse
