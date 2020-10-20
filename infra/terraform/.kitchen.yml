@@ -1,0 +1,21 @@
+---
+driver:
+  name: terraform
+
+provisioner:
+  name: terraform
+
+verifier:
+  name: terraform
+
+platforms:
+  - name: aws
+    verifier:
+      systems:
+      - name: remote
+        backend: aws
+        controls:
+          - private_storage
+
+suites:
+  - name: default
