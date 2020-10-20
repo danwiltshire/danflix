@@ -8,22 +8,8 @@ variable "application_name" {
   }
 }
 
-variable "environment" {
-  description = "The environment e.g. prod"
-  type        = string
-
-  validation {
-    condition     = length(var.environment) > 1
-    error_message = "The value must be greater than 1 characters long."
-  }
-}
-
-variable "resource_prefix" {
-  description = "The prefix will lead resource names"
-  type        = string
-
-  validation {
-    condition     = length(var.resource_prefix) > 1
-    error_message = "The value must be greater than 1 characters long."
-  }
+variable "aws_provider_configuration" {
+  type = map(object({
+    region     = string
+  }))
 }

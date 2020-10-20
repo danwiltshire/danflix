@@ -19,7 +19,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./backend
+        working-directory: ./infra/terraform
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -33,9 +33,9 @@ jobs:
         run: terraform fmt -check
         continue-on-error: true
 
-      - name: Terraform Init
-        id: init
-        run: terraform init
+#      - name: Terraform Init
+#        id: init
+#        run: terraform init
 
       - name: Terraform Validate
         id: validate
