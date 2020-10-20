@@ -23,8 +23,8 @@ from botocore.exceptions import ClientError
 
 def create_bucket(bucket_name, region):
 
-    iam = boto3.resource('iam')
-    role = iam.Role('danflix-terraform')
+    #iam = boto3.resource('iam')
+    #role = iam.Role('danflix-terraform')
 
     # Create bucket
     try:
