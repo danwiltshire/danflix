@@ -14,15 +14,16 @@ parser.add_argument('parent_account_user_name',
 )
 args = parser.parse_args()
 
-def parse_template(template, dict):
-  with open(template) as template:
-    return Template(template.read()).substitute(
+def string_substitute(tmpl, dict):
+  '''Takes in a file tmpl and dictionary dict, returns the string-substituted tmpl'''
+  with open(tmpl) as tmpl:
+    return Template(tmpl.read()).substitute(
       parent_account_id=args.parent_account_id,
       parent_account_user_name=args.parent_account_user_name,
       sts_externalid=uuid.uuid4()
     )
 
-print(parse_template('./templates/sts_assumerole.json.tmpl',
+print(string_substitute('./templates/sts_assumerole.json.tmpl',
   dict(
     parent_account_id=args.parent_account_id,
     parent_account_user_name=args.parent_account_user_name,
