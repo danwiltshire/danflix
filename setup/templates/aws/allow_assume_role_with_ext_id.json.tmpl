@@ -4,12 +4,12 @@
       {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::$parent_account_id:user/$parent_account_user_name"
+        "AWS": "arn:aws:iam::$parent_account_id:user/$parent_account_username"
       },
       "Action": "sts:AssumeRole",
       "Condition": {
         "StringEquals": {
-        "sts:ExternalId": "$sts_externalid"
+        "sts:ExternalId": "$external_id"
         }
       }
     }
