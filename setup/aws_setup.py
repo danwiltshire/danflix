@@ -7,7 +7,6 @@ import boto3
 import json
 import logging
 import argparse
-import pprint
 from string import Template
 from botocore.exceptions import ClientError
 from typing import TypedDict
@@ -204,6 +203,20 @@ def create_iam_role(role_name: str, policy: str, access_key: str, secret_key: st
     logging.error(e)
     return False
 
+def get_iam_role(role_name: str, access_key: str, secret_key: str):
+  try:
+    client = boto3.client('iam',
+      aws_access_key_id=access_key,
+      aws_secret_access_key=secret_key
+      )
+    res = client.get_role(
+      RoleName=role_name
+    )
+    return res
+  except ClientError as e:
+    logging.error(e)
+    return False
+
 def attach_role_policy(role_name: str, policy_arn: str, access_key: str, secret_key: str):
   try:
     client = boto3.client('iam',
@@ -308,7 +321,7 @@ for child_account in config['aws']['resources']['child_accounts']:
     config['aws']['credentials']['parent']['secret_key']
   )
 
-# Create child account danflix-[env]-ops users, assign AdministratorAccess,
+# Create child role danflix-[env]-ops users, assign AdministratorAccess,
 # allow role to be assumed by parent danflix-global-ops account.
 for child_account in config['aws']['resources']['child_accounts']:
   assume_role_policy: str = string_substitute(
@@ -331,6 +344,13 @@ for child_account in config['aws']['resources']['child_accounts']:
     config['aws']['credentials'][child_account['environment']]['access_key'],
     config['aws']['credentials'][child_account['environment']]['secret_key']
     )
+  role = get_iam_role(
+    child_account['role_name'],
+    config['aws']['credentials'][child_account['environment']]['access_key'],
+    config['aws']['credentials'][child_account['environment']]['secret_key']
+    )
+  external_id = role['Role']['AssumeRolePolicyDocument']['Statement'][0]['Condition']['StringEquals']['sts:ExternalId']
+  print("Allowed ExternalId for {}: {}".format(child_account['role_name'], external_id))
 
 # Global ops user access keys
 if args.replaceparentaccesskeys:
