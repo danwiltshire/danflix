@@ -6,9 +6,15 @@ import uuid
 import boto3
 import json
 import logging
+import argparse
+import pprint
 from string import Template
 from botocore.exceptions import ClientError
 from typing import TypedDict
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--replaceparentaccesskeys', action='store_true', help='replace existing parent access keys')
+args = parser.parse_args()
 
 #
 # Config
@@ -155,6 +161,35 @@ def create_access_key(username: str, access_key: str, secret_key: str) -> dict:
     logging.error(e)
     return False
 
+def list_access_keys(username: str, access_key: str, secret_key: str) -> dict:
+  try:
+    client = boto3.client('iam',
+      aws_access_key_id=access_key,
+      aws_secret_access_key=secret_key
+      )
+    res = client.list_access_keys(
+      UserName=username
+      )
+    return res
+  except ClientError as e:
+    logging.error(e)
+    return False
+
+def delete_access_key(username: str, access_key_id: str, access_key: str, secret_key: str) -> dict:
+  try:
+    client = boto3.client('iam',
+      aws_access_key_id=access_key,
+      aws_secret_access_key=secret_key
+      )
+    res = client.delete_access_key(
+      UserName=username,
+      AccessKeyId=access_key_id
+      )
+    return res
+  except ClientError as e:
+    logging.error(e)
+    return False
+
 def create_iam_role(role_name: str, policy: str, access_key: str, secret_key: str):
   try:
     client = boto3.client('iam',
@@ -242,18 +277,6 @@ attach_user_policy(
   config['aws']['credentials']['parent']['secret_key']
 )
 
-# Create API access credentials or global ops user
-credentials: str = create_access_key(
-  config['aws']['resources']['parent']['username'],
-  config['aws']['credentials']['parent']['access_key'],
-  config['aws']['credentials']['parent']['secret_key']
-  )
-# Print the credentials
-if credentials:
-  print(credentials['AccessKey']['UserName'] + " credentials:")
-  print("AccessKeyId: " + credentials['AccessKey']['AccessKeyId'])
-  print("SecretAccessKey: " + credentials['AccessKey']['SecretAccessKey'])
-
 # Create policies allowing danflix-global-ops to assume child roles
 for child_account in config['aws']['resources']['child_accounts']:
   state_write_policy: str = string_substitute(
@@ -308,3 +331,41 @@ for child_account in config['aws']['resources']['child_accounts']:
     config['aws']['credentials'][child_account['environment']]['access_key'],
     config['aws']['credentials'][child_account['environment']]['secret_key']
     )
+
+# Global ops user access keys
+if args.replaceparentaccesskeys:
+  keys = list_access_keys(
+    config['aws']['resources']['parent']['username'],
+    config['aws']['credentials']['parent']['access_key'],
+    config['aws']['credentials']['parent']['secret_key']
+    )
+  for key in keys['AccessKeyMetadata']:
+    delete_access_key(
+      config['aws']['resources']['parent']['username'],
+      key['AccessKeyId'],
+      config['aws']['credentials']['parent']['access_key'],
+      config['aws']['credentials']['parent']['secret_key']
+      )
+  # Create API access credentials or global ops user
+  credentials: str = create_access_key(
+    config['aws']['resources']['parent']['username'],
+    config['aws']['credentials']['parent']['access_key'],
+    config['aws']['credentials']['parent']['secret_key']
+    )
+  # Print the credentials
+  if credentials:
+    print(credentials['AccessKey']['UserName'] + " credentials:")
+    print("AccessKeyId: " + credentials['AccessKey']['AccessKeyId'])
+    print("SecretAccessKey: " + credentials['AccessKey']['SecretAccessKey'])
+else:
+  # Create API access credentials or global ops user
+  credentials: str = create_access_key(
+    config['aws']['resources']['parent']['username'],
+    config['aws']['credentials']['parent']['access_key'],
+    config['aws']['credentials']['parent']['secret_key']
+    )
+  # Print the credentials
+  if credentials:
+    print(credentials['AccessKey']['UserName'] + " credentials:")
+    print("AccessKeyId: " + credentials['AccessKey']['AccessKeyId'])
+    print("SecretAccessKey: " + credentials['AccessKey']['SecretAccessKey'])
