@@ -7,7 +7,7 @@ aws_provider_configuration = {
   dev = {
     region = "eu-west-2"
   }
-  kitchen-terraform-default-aws = {
+  test = {
     region = "eu-west-2"
   }
 }
@@ -23,7 +23,7 @@ auth0_provider_configuration = {
     auth0_client_id     = "abc"
     auth0_client_secret = "abc123"
   }
-  kitchen-terraform-default-aws = {
+  test = {
     auth0_domain        = "tenant.eu.auth0.com"
     auth0_client_id     = "abc"
     auth0_client_secret = "abc123"
