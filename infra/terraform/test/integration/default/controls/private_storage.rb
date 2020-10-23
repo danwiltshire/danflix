@@ -2,7 +2,6 @@
 
 # Examples found here: https://github.com/BensamV/kitchen-terraform-aws
 
-# Each API path should return 401 when unauthenticated
 control "private_storage" do
   ["private_storage_media_id", "private_storage_webapp_id"].each do | attribute |
     describe aws_s3_bucket(bucket_name: "#{attribute(attribute)}") do

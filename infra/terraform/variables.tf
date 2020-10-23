@@ -10,6 +10,21 @@ variable "application_name" {
 
 variable "aws_provider_configuration" {
   type = map(object({
-    region     = string
+    region = string
   }))
 }
+
+variable "auth0_provider_configuration" {
+  type = map(object({
+    auth0_domain        = string
+    auth0_client_id     = string
+    auth0_client_secret = string
+  }))
+}
+
+variable "auth_allowed_domains" {
+  type = list
+}
+
+variable "cloudfront_access_key_id" {}
+variable "cloudfront_private_key" {}

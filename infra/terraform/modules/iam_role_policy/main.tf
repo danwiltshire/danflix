@@ -1,10 +1,10 @@
 resource "aws_iam_role" "this" {
-  name = "${var.resource_prefix}-${var.role_name}"
+  name = var.role_name
   assume_role_policy = var.role_template
 }
 
 resource "aws_iam_policy" "this" {
-  name = "${var.resource_prefix}-${var.policy_name}"
+  name = var.policy_name
   policy = var.policy_template
 }
 

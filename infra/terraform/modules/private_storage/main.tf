@@ -1,6 +1,7 @@
 resource "aws_s3_bucket" "this" {
-  bucket        = "${var.resource_prefix}-${var.storage_name}"
+  bucket        = var.storage_name
   acl           = "private"
+  policy        = var.policy
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {

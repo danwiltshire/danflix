@@ -16,6 +16,8 @@ platforms:
         backend: aws
         controls:
           - private_storage
+          - function
+          - iam_role_policy
 
 suites:
   - name: default

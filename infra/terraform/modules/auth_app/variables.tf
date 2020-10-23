@@ -1,0 +1,10 @@
+variable "name" {}
+variable "description" {}
+variable "type" {}
+variable "oidc_conformant" {}
+variable "token_endpoint_auth_method" {}
+variable "callbacks" {}
+variable "allowed_web_origins" {}
+variable "allowed_logout_urls" {}
+variable "jwt_alg" {}
+variable "jwt_lifetime_in_seconds" {}
