@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { Button, ButtonGroup, Container } from "react-bootstrap";
+ import { Button, ButtonGroup, Container } from "react-bootstrap";
 import { useAuth0 } from '@auth0/auth0-react';
 
 const GetProtectedResourceButton = () => {

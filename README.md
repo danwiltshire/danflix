@@ -22,3 +22,4 @@ Currently the backend is deployed via Terraform and the frontend is deployed man
     * API: Auth0 Management API
     * Scopes: All (not ideal, could be locked down)
 10. Populate `backend/terraform.tfvars` with the `domain` (Auth0 tenant), `client_id` and `client_secret`
+11. Create a CloudFront key pair, populate private key in terraform.tfvars.
