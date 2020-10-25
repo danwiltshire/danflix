@@ -3,6 +3,7 @@ const AWS = require('aws-sdk'),
   region = process.env.REGION,
   secretName = process.env.SECRET_NAME,
   cloudFrontUrl = process.env.CLOUDFRONT_URL,
+  cloudFrontCookieValidityHours = process.env.CLOUDFRONT_COOKIE_VALIDITY_HOURS,
   keyPairID = process.env.ACCESS_KEY_ID,
   keyStart = '-----BEGIN RSA PRIVATE KEY-----',
   keyEnd = '-----END RSA PRIVATE KEY-----',
@@ -57,7 +58,7 @@ module.exports.handler = async (event) => {
       const signingParams = {
         keyPairId: keyPairID,
         privateKeyString: token,
-        expireTime: ((new Date()).getTime()) + 3600000*24
+        expireTime: ((new Date()).getTime()) + 3600000*cloudFrontCookieValidityHours
       };
       const signedCookies = getSignedCookies(`${cloudFrontUrl}/*`, signingParams);
       return {expiry: signingParams.expireTime, cookies: signedCookies};
@@ -76,8 +77,9 @@ module.exports.handler = async (event) => {
       };
       Object.keys(cookieObject.cookies).map((cookieName) => {
         let cookieString = `${cookieName}=${cookieObject.cookies[cookieName]};`
-        cookieString += ` expires=${new Date(cookieObject.expiry).toUTCString()};`;
+        cookieString += ` expires=${new Date(cookieObject.expiry).toUTCString()};`
         cookieString += ' path=/;'
+        cookieString += ' Secure;'
         response.multiValueHeaders['Set-Cookie'].push(cookieString)
       });
       return response;

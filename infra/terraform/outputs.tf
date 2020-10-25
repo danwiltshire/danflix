@@ -25,3 +25,15 @@ output "api_name" {
 output "api_endpoint" {
   value = aws_apigatewayv2_api.api.api_endpoint
 }
+
+output "cloudfront_distribution_domain_name" {
+  value = aws_cloudfront_distribution.this.domain_name
+}
+
+output "auth_client_id" {
+  value = module.auth_app.client_id
+}
+
+output "auth_domain" {
+  value = var.auth0_provider_configuration[terraform.workspace]["auth0_domain"]
+}

@@ -31,9 +31,9 @@ data "aws_caller_identity" "this" {
 module "private_storage_webapp" {
   source       = "./modules/private_storage"
   storage_name = "${local.resource_prefix}-webapp"
-  policy       = templatefile("./modules/private_storage/templates/allow_cloudfront.json.tmpl", {
+  policy = templatefile("./modules/private_storage/templates/allow_cloudfront.json.tmpl", {
     cloudfront_oai_arn = aws_cloudfront_origin_access_identity.storage_webapp.iam_arn
-    bucket_name = "${local.resource_prefix}-webapp"
+    bucket_name        = "${local.resource_prefix}-webapp"
   })
 }
 
@@ -43,9 +43,9 @@ module "private_storage_webapp" {
 module "private_storage_media" {
   source       = "./modules/private_storage"
   storage_name = "${local.resource_prefix}-media"
-  policy       = templatefile("./modules/private_storage/templates/allow_cloudfront.json.tmpl", {
+  policy = templatefile("./modules/private_storage/templates/allow_cloudfront.json.tmpl", {
     cloudfront_oai_arn = aws_cloudfront_origin_access_identity.storage_media.iam_arn
-    bucket_name = "${local.resource_prefix}-media"
+    bucket_name        = "${local.resource_prefix}-media"
   })
 }
 
@@ -53,7 +53,8 @@ module "private_storage_media" {
  * # secret to hold cloudfront private key
 */
 resource "aws_secretsmanager_secret" "this" {
-  name = "${local.resource_prefix}-cloudfront"
+  name                    = "${local.resource_prefix}-cloudfront-private-key"
+  recovery_window_in_days = 0
 }
 
 /**
@@ -93,7 +94,8 @@ module "function_getsignedcookie" {
   lambda_env_vars = {
     REGION         = var.aws_provider_configuration[terraform.workspace]["region"]
     SECRET_NAME    = aws_secretsmanager_secret.this.name
-    CLOUDFRONT_URL = "https://d2fblm968ng861.cloudfront.net"
+    CLOUDFRONT_URL = "https://${aws_cloudfront_distribution.this.domain_name}"
+    CLOUDFRONT_COOKIE_VALIDITY_HOURS = var.cloudfront_cookie_validity_hours
     ACCESS_KEY_ID  = var.cloudfront_access_key_id
   }
 }
@@ -116,8 +118,9 @@ resource "aws_apigatewayv2_api" "api" {
   name          = "${local.resource_prefix}-api"
   protocol_type = "HTTP"
   cors_configuration {
-    allow_origins = ["http://localhost:3000"]
-    allow_methods = ["GET"]
+    allow_origins = ["*"]
+    allow_methods = ["GET", "OPTIONS"]
+    allow_headers = ["authorization"]
   }
 }
 
@@ -143,13 +146,21 @@ module "api_route_api" {
   authorization_type = null
   authorizer_id      = null
 }
-module "api_route_api_getsignedcookie" {
+module "api_route_api_get_getsignedcookie" {
   source             = "./modules/api_route"
   api_id             = aws_apigatewayv2_api.api.id
   route_key          = "GET /api/signedcookie"
   target             = "integrations/${module.api_integration_getsignedcookie.id}"
   authorization_type = "JWT"
   authorizer_id      = module.api_authorizer.id
+}
+module "api_route_api_options_getsignedcookie" {
+  source             = "./modules/api_route"
+  api_id             = aws_apigatewayv2_api.api.id
+  route_key          = "OPTIONS /api/signedcookie"
+  target             = null
+  authorization_type = null
+  authorizer_id      = null
 }
 
 /**
@@ -161,7 +172,7 @@ module "api_authorizer" {
   authorizer_type  = "JWT"
   identity_sources = ["$request.header.Authorization"]
   name             = "${local.resource_prefix}-authorizer"
-  jwt_audience     = [aws_apigatewayv2_stage.api_stage.invoke_url]
+  jwt_audience     = [aws_apigatewayv2_api.api.api_endpoint]
   jwt_issuer       = "https://${var.auth0_provider_configuration[terraform.workspace]["auth0_domain"]}/"
 }
 
@@ -184,7 +195,8 @@ resource "aws_apigatewayv2_stage" "api_stage" {
 module "auth_api" {
   source       = "./modules/auth_api"
   name         = "${local.resource_prefix}-api"
-  identifier   = aws_apigatewayv2_stage.api_stage.invoke_url
+  identifier   = aws_apigatewayv2_api.api.api_endpoint
+
   signing_alg  = "RS256"
   skip_consent = true
 }
@@ -199,9 +211,9 @@ module "auth_app" {
   type                       = "spa"
   oidc_conformant            = true
   token_endpoint_auth_method = "none"
-  callbacks                  = ["http://localhost:3000"]
-  allowed_web_origins        = ["http://localhost:3000"]
-  allowed_logout_urls        = ["http://localhost:3000"]
+  callbacks                  = ["https://${aws_cloudfront_distribution.this.domain_name}"]
+  allowed_web_origins        = ["https://${aws_cloudfront_distribution.this.domain_name}"]
+  allowed_logout_urls        = ["https://${aws_cloudfront_distribution.this.domain_name}"]
   jwt_alg                    = "RS256"
   jwt_lifetime_in_seconds    = 36000
 }
@@ -235,40 +247,47 @@ resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
-  price_class = "PriceClass_100"
+  price_class         = "PriceClass_100"
   /**
    * ## Default route goes to the webapp
   */
   default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = module.private_storage_webapp.id
-    compress               = "true"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = module.private_storage_webapp.id
+    compress               = "false"
     viewer_protocol_policy = "https-only"
     min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    default_ttl            = 0
+    max_ttl                = 0
     forwarded_values {
       query_string = false
-      cookies {
-        forward = "none"
-      }
+      cookies { forward = "none" }
     }
   }
   /**
    * ## Route to API
   */
   ordered_cache_behavior {
-    path_pattern = "api/*"
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "${local.resource_prefix}-api"
+    path_pattern           = "api/*"
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"] // OPTIONS for CORS
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "${local.resource_prefix}-api"
     compress               = "false"
     viewer_protocol_policy = "https-only"
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 0
     forwarded_values {
       query_string = false
+      headers = ["Authorization"] // Required for Auth0 bearer token
       cookies {
-        forward = "all"
+        forward = "whitelist" 
+        whitelisted_names = [ // Generated cookies by getsignedcookies lambda
+          "CloudFront-Policy",
+          "CloudFront-Key-Pair-Id",
+          "CloudFront-Signature"
+        ]
       }
     }
   }
@@ -276,18 +295,19 @@ resource "aws_cloudfront_distribution" "this" {
    * ## Route to media
   */
   ordered_cache_behavior {
-    path_pattern = "media/*"
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = module.private_storage_media.id
+    path_pattern           = "media/*"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = module.private_storage_media.id
     compress               = "false"
     viewer_protocol_policy = "https-only"
-    trusted_signers = ["self"] // Require signed cookies
+    trusted_signers        = ["self"] // Require signed cookies
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 0
     forwarded_values {
       query_string = false
-      cookies {
-        forward = "none"
-      }
+      cookies { forward = "none" }
     }
   }
   origin {
@@ -308,10 +328,10 @@ resource "aws_cloudfront_distribution" "this" {
     domain_name = trimprefix(aws_apigatewayv2_api.api.api_endpoint, "https://")
     origin_id   = "${local.resource_prefix}-api"
     custom_origin_config {
-      http_port = "80"
-      https_port = "443"
+      http_port              = "80"
+      https_port             = "443"
       origin_protocol_policy = "https-only"
-      origin_ssl_protocols = ["TLSv1.2"]
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
   restrictions {
