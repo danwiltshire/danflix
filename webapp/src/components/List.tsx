@@ -16,14 +16,15 @@ interface ListProps {
 export const List: React.FC<ListProps> = ({items}) => {
   return (
     <ul>
-      {items.map((item: LinkItem | ListItem) => {
-        return 'link' in item ? (
-          <li><a href={item.link}>{item.text}</a></li>
-        ) : (
-          <li>{item.text}</li>
-        )
-      })
-    }
+      {
+        items.map((item: LinkItem | ListItem) => {
+          return 'link' in item ? (
+            <li><a href={item.link}>{item.text}</a></li>
+          ) : (
+            <li>{item.text}</li>
+          )
+        })
+      }
     </ul>
   );
 }
