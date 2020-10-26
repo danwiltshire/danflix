@@ -18,22 +18,37 @@ export const App: React.FC = () => {
     <div>
       <Counter>
         {(count, setCount) => (
-          <div>
-            {count}
+          <div className="counter">
+            <div>{count}</div>
             <button onClick={() => setCount(count + 1)}>+</button>
           </div>
         )}
       </Counter>
+      <hr />
       <Button />
+      <hr />
       <Logo
         width='auto'
         height='42px'
       />
-      <List
-        items={
-          listItems
-        }
+      <Logo
+        width='auto'
+        height='56px'
       />
+      <hr />
+      <div className="list">
+        <List
+          items={
+            listItems
+          }
+        />
+      </div>
+      <hr />
+      <h1>Heading 1</h1>
+      <span className="subheading">Subheading</span>
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita at repudiandae mollitia a quas impedit. Provident expedita inventore sint optio assumenda perferendis nostrum est necessitatibus ex quos, doloremque porro. Tempore?</p>
+      <hr />
+      <a href="https://github.com/danwiltshire/Violet">About Violet</a>
     </div>
   );
 }

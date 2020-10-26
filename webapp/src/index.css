@@ -1,10 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;600&display=swap');
 
 body {
   margin: 0;
   font-family: 'Quicksand', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 code {
@@ -12,6 +13,9 @@ code {
     monospace;
 }
 
+/*
+  Button
+*/
 button, input[type="submit"], input[type="reset"] {
 	background: none;
 	color: inherit;
@@ -28,7 +32,84 @@ button, input[type="submit"], input[type="reset"] {
   border-radius: 3px;
   font-size: 18px;
 }
-
-button:hover {
-  background-color: red;
+/* Psuedo element for faster box-shadow animation */
+button {
+  position: relative;
+  box-shadow: 0 8px 15px 0 rgba(0, 0, 0, 0.17);
+  transition: background-color 0.2s ease;
 }
+button:hover { background-color: #CF5CD9; }
+button:active { background-color: #C255CC; }
+button::before {
+  content: ' ';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 300ms;
+}
+button:hover::before { opacity: 1; }
+
+/*
+  List
+*/
+ul {
+  margin: 0;
+  padding: 0;
+}
+ul li {
+  border-top: 1px solid #C4C4C4;
+  font-size: 18px;
+  color: #393939;
+  font-weight: 300;
+  list-style-type: none;
+}
+ul li a {
+  display: block;
+  padding: 10px 0;
+  text-decoration: none;
+  background: url('img/list_arrow_right.svg') no-repeat 100% 50%;
+  background-size: auto 35%;
+  font-weight: 300;
+  font-size: 18px;
+}
+ul li a:link { color: #393939 }
+ul li a:visited { color: #393939 }
+ul li a:hover { color: #393939 }
+ul li a:active { color: #393939 }
+ul li.listItem { padding: 10px 0; } /* no <a>, add padding */
+ul li.linkItem { padding: 0; } /* <a> handles padding */
+ul li:last-child { border-bottom: 1px solid #C4C4C4; }
+div.list { width: 300px; }
+
+/*
+  Counter
+*/
+div.counter div {
+  font-size: 36px;
+}
+div.counter button {
+  display: block;
+}
+
+/*
+  hr
+*/
+hr {
+  margin: 20px 0;
+}
+
+/*
+  Font defaults
+*/
+h1 { font-size: 30px; font-weight: 300; margin: 20px 0;}
+span.subheading { font-size: 20px; font-weight: 300; margin: 0 0; display: block; color: #393939; }
+p { font-size: 16px; font-weight: 500; line-height: 28px; margin: 20px 0; }
+a { text-decoration: none; font-weight: 600; font-size: 16px; }
+a:link { color: #6A61D6 }
+a:visited { color: #6A61D6 }
+a:hover { color: #6A61D6 }
+a:active { color: #6A61D6 }

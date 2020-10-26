@@ -4,7 +4,7 @@ interface ButtonProps {
 
 }
 
-export const Button: React.FC<ButtonProps> = ({}) => {
+export const Button: React.FC<ButtonProps> = () => {
   return (
     <button>Log In</button>
   );

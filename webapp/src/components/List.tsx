@@ -17,11 +17,11 @@ export const List: React.FC<ListProps> = ({items}) => {
   return (
     <ul>
       {
-        items.map((item: LinkItem | ListItem) => {
+        items.map((item: LinkItem | ListItem, index) => {
           return 'link' in item ? (
-            <li><a href={item.link}>{item.text}</a></li>
+            <li className="linkItem" key={index}><a href={item.link}>{item.text}</a></li>
           ) : (
-            <li>{item.text}</li>
+            <li className="listItem" key={index}>{item.text}</li>
           )
         })
       }
