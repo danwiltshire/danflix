@@ -37,6 +37,7 @@ button {
   position: relative;
   box-shadow: 0 8px 15px 0 rgba(0, 0, 0, 0.17);
   transition: background-color 0.2s ease;
+  margin: 30px 0 0 0;
 }
 button:hover { background-color: #CF5CD9; }
 button:active { background-color: #C255CC; }
@@ -57,7 +58,7 @@ button:hover::before { opacity: 1; }
   List
 */
 ul {
-  margin: 0;
+  margin: 20px 0 0 0;
   padding: 0;
 }
 ul li {
@@ -71,8 +72,7 @@ ul li a {
   display: block;
   padding: 10px 0;
   text-decoration: none;
-  background: url('img/list_arrow_right.svg') no-repeat 100% 50%;
-  background-size: auto 35%;
+  background: url('./img/chevron_right.png') no-repeat 100% 50%;
   font-weight: 300;
   font-size: 18px;
 }
@@ -105,11 +105,19 @@ hr {
 /*
   Font defaults
 */
-h1 { font-size: 30px; font-weight: 300; margin: 20px 0;}
-span.subheading { font-size: 20px; font-weight: 300; margin: 0 0; display: block; color: #393939; }
-p { font-size: 16px; font-weight: 500; line-height: 28px; margin: 20px 0; }
+h1 { font-size: 30px; font-weight: 300; margin: 20px 0 0 0;}
+span.subheading { font-size: 20px; font-weight: 300; margin: 20px 0 0 0; display: block; color: #393939; }
+p { font-size: 16px; font-weight: 500; line-height: 28px; margin: 20px 0 0 0; }
 a { text-decoration: none; font-weight: 600; font-size: 16px; }
 a:link { color: #6A61D6 }
 a:visited { color: #6A61D6 }
 a:hover { color: #6A61D6 }
 a:active { color: #6A61D6 }
+
+/*
+  Header
+*/
+header a { /* Go back link */
+  background: url('./img/chevron_left.png') no-repeat 0 50%;
+  padding-left: 13px;
+}
