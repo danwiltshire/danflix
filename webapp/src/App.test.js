@@ -1,11 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import { About } from './routes/About';
-import { Holding } from './routes/Holding';
-import { Browse } from './routes/Browse';
-import { Profile } from './routes/Profile';
-import { Welcome } from './routes/Welcome';
-import { Loading } from './routes/Loading';
-import { HTTP_404 } from './routes/HTTP_404';
+import { About } from './views/About';
+import { Holding } from './views/Holding';
+import { Browse } from './views/Browse';
+import { Profile } from './views/Profile';
+import { Welcome } from './views/Welcome';
+import { Loading } from './views/Loading';
+import { BrowserRouter } from 'react-router-dom';
+import { Notice } from './views/Notice';
 
 test('renders about route', () => {
   render(<About />);
@@ -20,19 +21,31 @@ test('renders holding route', () => {
 });
 
 test('renders browse route', () => {
-  render(<Browse />);
-  const linkElement = screen.getByText(/A link to nothing/i);
+  render(
+    <BrowserRouter>
+      <Browse />
+    </BrowserRouter>
+  );
+  const linkElement = screen.getByText(/Log in/i);
   expect(linkElement).toBeInTheDocument();
 });
 
 test('renders profile route', () => {
-  render(<Profile />);
-  const linkElement = screen.getByText(/User Full Name/i);
+  render(
+    <BrowserRouter>
+      <Profile />
+    </BrowserRouter>
+  );
+  const linkElement = screen.getByText(/Log in/i);
   expect(linkElement).toBeInTheDocument();
 });
 
 test('renders welcome route', () => {
-  render(<Welcome />);
+  render(
+    <BrowserRouter>
+      <Welcome />
+    </BrowserRouter>
+  );
   const linkElement = screen.getByText(/Welcome to Violet/i);
   expect(linkElement).toBeInTheDocument();
 });
@@ -43,8 +56,8 @@ test('renders loading route', () => {
   expect(linkElement).toBeInTheDocument();
 });
 
-test('renders error 404 route', () => {
-  render(<HTTP_404 />);
-  const linkElement = screen.getByText(/404 Not Found/i);
+test('renders notice route', () => {
+  render(<Notice heading={"A test heading"} subheading={"A test notice subheading"} />);
+  const linkElement = screen.getByText(/A test notice subheading/i);
   expect(linkElement).toBeInTheDocument();
 });

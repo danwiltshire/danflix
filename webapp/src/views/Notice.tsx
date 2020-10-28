@@ -1,12 +1,13 @@
 import React from 'react'
 import { Logo } from '../components/Logo';
 
-interface HoldingProps {
+interface NoticeProps {
   heading: string,
   subheading: string
 }
 
-export const Holding: React.FC<HoldingProps> = ({heading, subheading}) => {
+export const Notice: React.FC<NoticeProps> = ({heading, subheading}) => {
+
   return (
     <div>
       <main>

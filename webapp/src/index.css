@@ -16,7 +16,7 @@ code {
 /*
   Button
 */
-button, input[type="submit"], input[type="reset"] {
+button {
 	background: none;
 	color: inherit;
 	border: none;
@@ -31,28 +31,11 @@ button, input[type="submit"], input[type="reset"] {
   height: 40px;
   border-radius: 3px;
   font-size: 18px;
-}
-/* Psuedo element for faster box-shadow animation */
-button {
-  position: relative;
   box-shadow: 0 8px 15px 0 rgba(0, 0, 0, 0.17);
-  transition: background-color 0.2s ease;
   margin: 30px 0 0 0;
 }
-button:hover { background-color: #CF5CD9; }
-button:active { background-color: #C255CC; }
-button::before {
-  content: ' ';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.3);
-  opacity: 0;
-  transition: opacity 300ms;
-}
-button:hover::before { opacity: 1; }
+button:hover { background-color: #574DD1; }
+button:active { background-color: #4439CC; }
 
 /*
   List
@@ -117,7 +100,7 @@ a:active { color: #6A61D6 }
 /*
   Header
 */
-header a { /* Go back link */
+header a.back { /* Go back link */
   background: url('./img/chevron_left.png') no-repeat 0 50%;
   padding-left: 13px;
 }

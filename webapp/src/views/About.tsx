@@ -1,5 +1,6 @@
 import React from 'react'
 import { Logo } from '../components/Logo'
+import { Header } from '../components/Header';
 
 interface AboutProps {
 
@@ -8,9 +9,7 @@ interface AboutProps {
 export const About: React.FC<AboutProps> = () => {
   return (
     <div>
-      <header>
-        <a href="https://github.com/danwiltshire/Violet">Back</a>
-      </header>
+      <Header profileIcon />
       <main>
         <Logo width='auto' height='56px' />
         <h1>Violet</h1>

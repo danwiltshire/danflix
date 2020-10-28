@@ -8,6 +8,7 @@ import { Auth0Provider } from '@auth0/auth0-react';
 const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
 const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
+const useRefreshTokens = process.env.REACT_APP_AUTH0_USE_REFRESH_TOKENS;
 
 ReactDOM.render(
   <React.StrictMode>
@@ -15,7 +16,8 @@ ReactDOM.render(
     domain={domain}
     clientId={clientId}
     redirectUri={window.location.origin}
-    audience={audience}>
+    audience={audience}
+    useRefreshTokens={useRefreshTokens}>
       <App />
     </Auth0Provider>
   </React.StrictMode>,

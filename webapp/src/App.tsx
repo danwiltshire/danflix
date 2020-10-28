@@ -1,29 +1,25 @@
 import React from 'react'
 import { BrowserRouter, Route, Switch } from 'react-router-dom'
-import { About } from './routes/About'
-import { Holding } from './routes/Holding'
-import { Welcome } from './routes/Welcome'
-import { Browse } from './routes/Browse'
-import { Profile } from './routes/Profile'
-import { Loading } from './routes/Loading'
-import { HTTP_404 } from './routes/HTTP_404'
+import { About } from './views/About'
+import { Holding } from './views/Holding'
+import { Welcome } from './views/Welcome'
+import { Browse } from './views/Browse'
+import { Profile } from './views/Profile'
+import { Loading } from './views/Loading'
 import { useAuth0 } from '@auth0/auth0-react'
-
-
-
-
-
+import { Notice } from './views/Notice'
 
 export const App: React.FC = () => {
 
   const { isLoading, error } = useAuth0();
 
-  if ( isLoading ) {
-    return <Loading />
-  }
+  if ( isLoading ) { return <Loading />  }
 
   if ( error ) {
-    return <Holding heading="Violet is unavailable" subheading="Authentication isn't working right now, please check back later." />
+    return <Holding
+      heading="Violet is unavailable"
+      subheading="Authentication isn't working right now, please check back later."
+    />
   }
 
   return (
@@ -35,7 +31,13 @@ export const App: React.FC = () => {
         <Route path="/browse" component={Browse} />
         <Route path="/profile" component={Profile} />
         <Route path="/loading" component={Loading} />
-        <Route path="/" render={() => <HTTP_404 />} />
+        <Route path="/notice" component={Notice} />
+        <Route path="/" render={() => <Holding
+            heading={"404 Not Found"}
+            subheading={"Violet can't find that."}
+            browseButton
+          />}
+        />
       </Switch>
     </BrowserRouter>
   );
