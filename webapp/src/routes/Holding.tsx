@@ -2,16 +2,17 @@ import React from 'react'
 import { Logo } from '../components/Logo';
 
 interface HoldingProps {
-
+  heading: string,
+  subheading: string
 }
 
-export const Holding: React.FC<HoldingProps> = () => {
+export const Holding: React.FC<HoldingProps> = ({heading, subheading}) => {
   return (
     <div>
       <main>
         <Logo width='auto' height='56px' />
-        <h1>Violet is unavailable</h1>
-        <span className="subheading">Sorry, the API isn't responding. Please check back later.</span>
+        <h1>{heading}</h1>
+        <span className="subheading">{subheading}</span>
       </main>
     </div>
   );
