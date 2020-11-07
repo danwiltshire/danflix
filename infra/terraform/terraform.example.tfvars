@@ -33,8 +33,8 @@ auth0_provider_configuration = {
 auth_allowed_domains = ["domain.com", "domain2.com"]
 
 cloudfront_cookie_validity_hours = 24
-cloudfront_access_key_id = "ABCDEFGHIJKLMNOPQRSTUVWYZ"
-cloudfront_private_key   = <<EOF
+cloudfront_access_key_id         = "ABCDEFGHIJKLMNOPQRSTUVWYZ"
+cloudfront_private_key           = <<EOF
 privatekeyprivatekeyprivatekeyprivatekeyprivatekeyprivatekeypriv
 privatekeyprivatekeyprivatekeyprivatekeyprivatekeyprivatekeypriv
 privatekeyprivatekeyprivatekeyprivatekeyprivatekeyprivatekeypriv

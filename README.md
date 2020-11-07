@@ -1,8 +1,8 @@
-# danflix
+# Violet
 
-An alternative take on Plex/Netflix.
+Violet is an open source lightweight media hosting solution.  It can be deployed onto Amazon AWS in minutes.
 
-Pulls in video content from an external source and caches it on AWS S3 for fast and reliable on-demand playback.  Auto deletes played video from S3 to reduce storage costs.
+Currently under development and is not considered stable.
 
 ## Deploying
 

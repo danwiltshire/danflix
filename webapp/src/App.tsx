@@ -8,6 +8,7 @@ import { Profile } from './views/Profile'
 import { Loading } from './views/Loading'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Notice } from './views/Notice'
+import { Player } from './views/Player'
 
 export const App: React.FC = () => {
 
@@ -16,22 +17,24 @@ export const App: React.FC = () => {
   if ( isLoading ) { return <Loading />  }
 
   if ( error ) {
-    return <Holding
-      heading="Violet is unavailable"
-      subheading="Authentication isn't working right now, please check back later."
-    />
+    return <BrowserRouter>
+      <Holding
+        heading="Violet is unavailable"
+        subheading="Authentication isn't working right now, please check back later."
+      />
+    </BrowserRouter>
   }
-
+  
   return (
     <BrowserRouter>
       <Switch>
         <Route path="/" exact component={Welcome} />
         <Route path="/about" component={About} />
-        <Route path="/holding" component={Holding} />
         <Route path="/browse" component={Browse} />
         <Route path="/profile" component={Profile} />
         <Route path="/loading" component={Loading} />
         <Route path="/notice" component={Notice} />
+        <Route path="/player" component={Player} />
         <Route path="/" render={() => <Holding
             heading={"404 Not Found"}
             subheading={"Violet can't find that."}

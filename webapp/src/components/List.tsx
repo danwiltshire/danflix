@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
 type LinkItem = {
   text: string,
@@ -19,7 +20,7 @@ export const List: React.FC<ListProps> = ({items}) => {
       {
         items.map((item: LinkItem | ListItem, index) => {
           return 'link' in item ? (
-            <li className="linkItem" key={index}><a href={item.link}>{item.text}</a></li>
+            <li className="linkItem" key={index}><Link to={item.link}>{item.text}</Link></li>
           ) : (
             <li className="listItem" key={index}>{item.text}</li>
           )

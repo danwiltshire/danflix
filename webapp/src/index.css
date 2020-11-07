@@ -104,3 +104,39 @@ header a.back { /* Go back link */
   background: url('./img/chevron_left.png') no-repeat 0 50%;
   padding-left: 13px;
 }
+
+div.search {
+  width: 140px;
+  text-align: right;
+}
+
+#demo-2 input[type=search] {
+	width: 15px;
+	padding: 0 20px 0 0;
+	color: transparent;
+  cursor: pointer;
+  background: url('./img/search_small.png') no-repeat right 13px center;
+  height: 45px;
+  width: 45px;
+  border-radius: 45px;
+  border: 1px solid #C4C4C4;
+  font-size: 16px;
+  font-weight: 500;
+}
+#demo-2 input[type=search]:hover {
+	background-color: #fff;
+}
+#demo-2 input[type=search]:focus {
+	width: 100%;
+	padding-left: 12px;
+	color: #000;
+	background-color: #fff;
+  cursor: auto;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+#demo-2 input:-moz-placeholder {
+	color: transparent;
+}
+#demo-2 input::-webkit-input-placeholder {
+	color: transparent;
+}

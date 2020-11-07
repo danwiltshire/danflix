@@ -1,6 +1,6 @@
 data "archive_file" "this" {
   type        = "zip"
-  output_path = "/tmp/archive.zip"
+  output_path = "/tmp/${var.function_name}.zip"
   source {
     content  = var.lambda_template
     filename = "index.js"

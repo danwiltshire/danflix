@@ -92,11 +92,11 @@ module "function_getsignedcookie" {
   role_arn        = module.iam_role_policy_getsignedcookie.role_arn
   lambda_template = file("./modules/function/templates/getsignedcookie.js.tmpl")
   lambda_env_vars = {
-    REGION         = var.aws_provider_configuration[terraform.workspace]["region"]
-    SECRET_NAME    = aws_secretsmanager_secret.this.name
-    CLOUDFRONT_URL = "https://${aws_cloudfront_distribution.this.domain_name}"
+    REGION                           = var.aws_provider_configuration[terraform.workspace]["region"]
+    SECRET_NAME                      = aws_secretsmanager_secret.this.name
+    CLOUDFRONT_URL                   = "https://${aws_cloudfront_distribution.this.domain_name}"
     CLOUDFRONT_COOKIE_VALIDITY_HOURS = var.cloudfront_cookie_validity_hours
-    ACCESS_KEY_ID  = var.cloudfront_access_key_id
+    ACCESS_KEY_ID                    = var.cloudfront_access_key_id
   }
 }
 
@@ -107,6 +107,45 @@ resource "aws_lambda_permission" "function_getsignedcookie_permission" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = module.function_getsignedcookie.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/*"
+}
+
+/**
+ * # listbucket lambda IAM role
+*/
+module "iam_role_policy_listbucket" {
+  source        = "./modules/iam_role_policy"
+  role_name     = "${local.resource_prefix}-allow-listbucket"
+  role_template = file("./modules/iam_role_policy/templates/allow_lambda_assume.json")
+  policy_name   = "${local.resource_prefix}-allow-listbucket"
+  policy_template = templatefile("./modules/iam_role_policy/templates/allow_listbucket.json.tmpl", {
+    bucket_id = module.private_storage_media.id
+  })
+}
+
+/**
+ * # listbucket lambda function
+*/
+module "function_listbucket" {
+  source          = "./modules/function"
+  function_name   = "${local.resource_prefix}-listbucket"
+  handler         = "index.handler"
+  runtime         = "nodejs12.x"
+  role_arn        = module.iam_role_policy_listbucket.role_arn
+  lambda_template = file("./modules/function/templates/listbucket.js.tmpl")
+  lambda_env_vars = {
+    BUCKET_ID = module.private_storage_media.id
+  }
+}
+
+/**
+ * # allow calling listbucket function from API gateway
+*/
+resource "aws_lambda_permission" "function_listbucket_permission" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = module.function_listbucket.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/*"
 }
@@ -134,6 +173,13 @@ module "api_integration_getsignedcookie" {
   integration_method = "POST"
   integration_uri    = module.function_getsignedcookie.invoke_arn
 }
+module "api_integration_listbucket" {
+  source             = "./modules/api_integration"
+  api_id             = aws_apigatewayv2_api.api.id
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST"
+  integration_uri    = module.function_listbucket.invoke_arn
+}
 
 /**
  * # API gateway routes
@@ -158,6 +204,22 @@ module "api_route_api_options_getsignedcookie" {
   source             = "./modules/api_route"
   api_id             = aws_apigatewayv2_api.api.id
   route_key          = "OPTIONS /api/signedcookie"
+  target             = null
+  authorization_type = null
+  authorizer_id      = null
+}
+module "api_route_api_get_listbucket" {
+  source             = "./modules/api_route"
+  api_id             = aws_apigatewayv2_api.api.id
+  route_key          = "GET /api/listbucket"
+  target             = "integrations/${module.api_integration_listbucket.id}"
+  authorization_type = "JWT"
+  authorizer_id      = module.api_authorizer.id
+}
+module "api_route_api_options_listbucket" {
+  source             = "./modules/api_route"
+  api_id             = aws_apigatewayv2_api.api.id
+  route_key          = "OPTIONS /api/listbucket"
   target             = null
   authorization_type = null
   authorizer_id      = null
@@ -193,9 +255,9 @@ resource "aws_apigatewayv2_stage" "api_stage" {
  * # Auth0 api for use by AWS API Gateway
 */
 module "auth_api" {
-  source       = "./modules/auth_api"
-  name         = "${local.resource_prefix}-api"
-  identifier   = aws_apigatewayv2_api.api.api_endpoint
+  source     = "./modules/auth_api"
+  name       = "${local.resource_prefix}-api"
+  identifier = aws_apigatewayv2_api.api.api_endpoint
 
   signing_alg  = "RS256"
   skip_consent = true
@@ -211,9 +273,9 @@ module "auth_app" {
   type                       = "spa"
   oidc_conformant            = true
   token_endpoint_auth_method = "none"
-  callbacks                  = ["https://${aws_cloudfront_distribution.this.domain_name}"]
-  allowed_web_origins        = ["https://${aws_cloudfront_distribution.this.domain_name}"]
-  allowed_logout_urls        = ["https://${aws_cloudfront_distribution.this.domain_name}"]
+  callbacks                  = ["https://${aws_cloudfront_distribution.this.domain_name}", "http://localhost:3000"]
+  allowed_web_origins        = ["https://${aws_cloudfront_distribution.this.domain_name}", "http://localhost:3000"]
+  allowed_logout_urls        = ["https://${aws_cloudfront_distribution.this.domain_name}", "http://localhost:3000"]
   jwt_alg                    = "RS256"
   jwt_lifetime_in_seconds    = 36000
 }
@@ -280,9 +342,9 @@ resource "aws_cloudfront_distribution" "this" {
     max_ttl                = 0
     forwarded_values {
       query_string = false
-      headers = ["Authorization"] // Required for Auth0 bearer token
+      headers      = ["Authorization"] // Required for Auth0 bearer token
       cookies {
-        forward = "whitelist" 
+        forward = "whitelist"
         whitelisted_names = [ // Generated cookies by getsignedcookies lambda
           "CloudFront-Policy",
           "CloudFront-Key-Pair-Id",
@@ -341,5 +403,11 @@ resource "aws_cloudfront_distribution" "this" {
   }
   viewer_certificate {
     cloudfront_default_certificate = true
+  }
+  // Let react router handle page requests called outside React <Link> elements.
+  custom_error_response {
+    error_code = 403
+    response_code = 200
+    response_page_path = "/index.html"
   }
 }

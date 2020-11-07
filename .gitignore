@@ -1,3 +1,7 @@
 .DS_Store
 
 setup/config.json
+setup/media
+setup/transcode/source/*
+setup/transcode/destination/*
+setup/transcode/state.csv
