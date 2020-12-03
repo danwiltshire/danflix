@@ -4,6 +4,7 @@ from pathlib import Path
 import csv
 import secrets
 from string import Template
+import tempfile
 
 source = Path('/mnt/c/Users/danielwiltshire/Downloads/Featurettes')
 destination = Path('destination')
@@ -50,10 +51,11 @@ def generateInitVector() -> str:
   return secrets.token_hex(16)
 
 def generateKeyInfoFile(uri: str, key_name: str, iv: str) -> str:
-  with open('./templates/hls_key_info_file.tmpl') as t:
+  dir = Path(__file__).parent
+  with open( Path(dir, './templates/hls_key_info_file.tmpl') ) as t:
     return Template(t.read()).substitute(uri=uri, key_name=key_name, iv=iv)
 
-def transcode(input: Path, output: Path):
+def transcode(input: Path, output: Path, kif: Path):
   print("transcode(): input: " + str(input))
   print("transcode(): output: " + str(output))
   if not os.path.exists(output):
@@ -62,8 +64,9 @@ def transcode(input: Path, output: Path):
   segmentFilename = Path(str(output) + "/720p_%03d.ts")
   if not os.path.exists(playlistFilename):
     #command = f'ffmpeg -hwaccel auto -i "{input}" -sn -vf scale=w=1280:h=720:force_original_aspect_ratio=decrease -c:a aac -ar 48000 -b:a 128k -c:v h264 -profile:v main -crf 20 -g 192 -keyint_min 192 -sc_threshold 0 -b:v 2500k -maxrate 2675k -bufsize 3750k -hls_time 16 -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
-    command = f'ffmpeg -hwaccel auto -i "{input}" -keyint_min 192 -sc_threshold 0 -hls_time 16 -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
+    command = f'ffmpeg -hwaccel auto -i "{input}" -keyint_min 192 -sc_threshold 0 -hls_time 16 -hls_key_info_file "{kif}" -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
     os.system(command)
+    print(kif)
   else:
     print("transcode(): skipping because m3u8 exists")
 
@@ -111,7 +114,30 @@ for root, dirs, files in os.walk(source, topdown=False):
         outputPath = Path(str("destination") + '/' + stateIV)
       else:
         raise RuntimeError("...stateIV is invalid")
+
+      dir = Path(__file__).parent
+
+      kif = generateKeyInfoFile(f'https://d3ss7civfz2zg0.cloudfront.net/media/{stateIV}/key', f'{dir}/destination/{stateIV}/key', stateIV)
+      tf = tempfile.NamedTemporaryFile()
+      tf.write(str.encode(kif))
+      tf.flush()
+
+      with open(tf.name, 'r') as testt:
+        print(testt.read())
+
       
+      kfDir = Path(dir, outputPath)
+      kfPath = Path(dir, outputPath, 'key')
+      if Path(kfPath).is_file():
+        print("...key file exists")
+      else:
+        if not os.path.exists(kfDir):
+          print("...creating directories") # Why not do this earlier??
+          os.makedirs(kfDir)
+        print("...creating key file")
+        kf = open(kfPath , "w")
+        kf.write( str(generateKey()) )
+
       if Path(outputPath).is_file():
         print("...transcode exists")
       else:
@@ -119,4 +145,6 @@ for root, dirs, files in os.walk(source, topdown=False):
         print(f"...transcoding output: {outputPath}")
         Path(outputPath).mkdir(parents=True, exist_ok=True)
         print("...starting transcode")
-        transcode(sourcePath, outputPath)
+        transcode(sourcePath, outputPath, Path(tf.name))
+
+      tf.close()
