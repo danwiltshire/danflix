@@ -1,18 +1,48 @@
-from csv import DictReader
-from os import error
-from typing import Dict, Tuple
-import uuid
+from typing import Dict, Tuple, List
 import os
 from pathlib import Path
 import csv
 import secrets
 from string import Template
 
-source = Path('/mnt/c/Users/DanielWiltshire/Downloads/Media')
+source = Path('/mnt/c/Users/danielwiltshire/Downloads/Featurettes')
 destination = Path('destination')
 extensions: Tuple[str, ...] = ('.mp4', '.mkv', '.beef')
 state = Path('state.csv')
 
+class State:
+  def __init__(self, statePath: Path):
+    self.statePath = statePath
+    fields: List[str] = ['source', 'iv']
+    if not os.path.exists( str(self.statePath) ):
+      open(statePath, 'a').close()
+    self.writer = csv.DictWriter(
+      open( str(self.statePath), 'a', newline='' ),
+      fieldnames=fields)
+    if os.stat(statePath).st_size == 0:
+      self.writer.writeheader()
+
+  def get(self, source: str) -> List[Dict[str, str]]:
+    matches: List[Dict[str, str]] = []
+    reader = csv.DictReader( open( str(self.statePath) ) )
+    for row in reader:
+      if row['source'] == str(source):
+        matches.append(row)
+    return matches
+
+  def write(self, source: str, iv: str):
+    print(source)
+    self.writer.writerow({'source': source, 'iv': iv})
+
+  def isValid(self, row: Dict[str, str]) -> bool:
+    if not len(row['iv']) == 32:
+      print("Failed to validate iv length", len(row['iv']))
+      return False
+    if not row['iv'].isalnum():
+      print("Failed to validate iv row alphanumerics")
+      return False
+    return True
+ 
 def generateKey() -> int:
   return secrets.randbits(128)
 
@@ -31,76 +61,62 @@ def transcode(input: Path, output: Path):
   playlistFilename = Path(str(output) + "/720p.m3u8")
   segmentFilename = Path(str(output) + "/720p_%03d.ts")
   if not os.path.exists(playlistFilename):
-    command = f'ffmpeg -hwaccel auto -i "{input}" -sn -vf scale=w=1280:h=720:force_original_aspect_ratio=decrease -c:a aac -ar 48000 -b:a 128k -c:v h264 -profile:v main -crf 20 -g 192 -keyint_min 192 -sc_threshold 0 -b:v 2500k -maxrate 2675k -bufsize 3750k -hls_time 16 -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
+    #command = f'ffmpeg -hwaccel auto -i "{input}" -sn -vf scale=w=1280:h=720:force_original_aspect_ratio=decrease -c:a aac -ar 48000 -b:a 128k -c:v h264 -profile:v main -crf 20 -g 192 -keyint_min 192 -sc_threshold 0 -b:v 2500k -maxrate 2675k -bufsize 3750k -hls_time 16 -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
+    command = f'ffmpeg -hwaccel auto -i "{input}" -keyint_min 192 -sc_threshold 0 -hls_time 16 -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
     os.system(command)
   else:
     print("transcode(): skipping because m3u8 exists")
 
-def getState(input: Path):
-  print("getState(): " + str(input))
-  try:
-    with open(state) as csvfile:
-      reader = csv.DictReader(csvfile)
-      for row in reader:
-        if row['input'] == str(input):
-          return row['random']
-  except:
-    raise Exception("getState(): couldn't get: " + str(input))
-
-def initState(state: Path):
-  if not os.path.exists(state):
-    print("initState(): initialising: " + str(state))
-    try:
-      with open(state, 'w', newline='') as csvfile:
-        fieldnames = ['input', 'random']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-    except:
-      raise Exception("initState() couldn't initialise: " + str(state))
-
-def writeState(input: Path, random: str):
-  print("writeState(): writing: " + str(input))
-  try:
-    with open(state, 'a', newline='') as csvfile:
-      fieldnames = ['input', 'random']
-      writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-      writer.writerow({'input': str(input), 'random': random})
-  except:
-    raise Exception("writeState() couldn't write: " + str(input))
-
 # Create state file
-initState(state)
+state = State( Path('state.csv')) 
 
 for root, dirs, files in os.walk(source, topdown=False):
   for file in files:
     if file.endswith(extensions):
-      random = str(uuid.uuid4())
-      iv = generateInitVector()
-      input: Path = Path(root + '/' + file)
-      existingRand = getState(input)
-      existingIV = getState(iv)
-      if not existingRand: # No state exists, use new random
-        writeState(input, random)
-        output: Path = Path(str(destination) + '/' + random)
-        transcode(input, output)
-        if not Path(output, 'k').is_file():
-          print(generateKeyInfoFile(f"https://d3ss7civfz2zg0.cloudfront.net/media/{random}/k", random))
-      if existingRand: # State exists, use existing random
-        output: Path = Path(str(destination) + '/' + existingRand)
-        transcode(input, output)
-        if not Path(output, 'k').is_file():
-          print(generateKeyInfoFile(f"https://d3ss7civfz2zg0.cloudfront.net/media/{existingRand}/k", existingRand))
-      #print("Would transcode")
-      #transcode(input, output)
+      writeState: bool = False
+      stateIV: str = ""
+      outputPath: Path
+      print(f"{file}:")
 
+      print("...joining source path")
+      sourcePath: Path = Path(root + '/' + file)
 
+      print("...getting state")
+      fileStates = state.get( str(sourcePath) )
 
+      if len(fileStates) > 1:
+        print("...multiple state entries found")
+        raise RuntimeError(f"duplicate state entries found for {file}")
 
-#(
-#  ffmpeg
-#  .input('./source/')
-#  .output('./destination/', format='hls', hls_time=16, hls_playlist_type='vod')
-#)
+      if len(fileStates) == 0:
+        print("...no existing state")
+        writeState = True
 
+      for fileState in fileStates:
+        print("...found state record")
 
-#input = ffmpeg.input(file)
+        print("...validate state")
+        if state.isValid(fileState):
+          print("...state is valid")
+          stateIV = fileState['iv']
+        else:
+          raise RuntimeError(f"invalid state for {file}")
+
+      if writeState:
+        print("...writing state")
+        stateIV = secrets.token_hex(16)
+        state.write( str(sourcePath), stateIV )
+
+      if len(stateIV) == 32:
+        outputPath = Path(str("destination") + '/' + stateIV)
+      else:
+        raise RuntimeError("...stateIV is invalid")
+      
+      if Path(outputPath).is_file():
+        print("...transcode exists")
+      else:
+        print(f"...transcoding source: {sourcePath}")
+        print(f"...transcoding output: {outputPath}")
+        Path(outputPath).mkdir(parents=True, exist_ok=True)
+        print("...starting transcode")
+        transcode(sourcePath, outputPath)
