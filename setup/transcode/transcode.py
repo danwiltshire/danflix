@@ -5,10 +5,17 @@ import csv
 import secrets
 from string import Template
 import tempfile
+import argparse
 
-source = Path('/mnt/c/Users/danielwiltshire/Downloads/Featurettes')
-destination = Path('destination')
-extensions: Tuple[str, ...] = ('.mp4', '.mkv', '.beef')
+parser = argparse.ArgumentParser(description='Encrypted HLS transcoder')
+parser.add_argument('-s', '--source', help='source file directory', default='source')
+parser.add_argument('-d', '--destination', help='destination file directory', default='destination')
+parser.add_argument('-e', '--extensions', nargs='+', help='extensions to process', default=['mkv'])
+args = parser.parse_args()
+
+source = Path(args.source)
+destination = Path(args.destination)
+extensions: Tuple[str, ...] = args.extensions
 state = Path('state.csv')
 
 class State:
