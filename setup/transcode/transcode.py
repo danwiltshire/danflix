@@ -1,157 +1,137 @@
-from typing import Dict, Tuple, List
+from typing import Dict, Optional, Tuple, List
 import os
 from pathlib import Path
 import csv
 import secrets
 from string import Template
-import tempfile
 import argparse
+import posixpath
 
 parser = argparse.ArgumentParser(description='Encrypted HLS transcoder')
-parser.add_argument('-s', '--source', help='source file directory', default='source')
-parser.add_argument('-d', '--destination', help='destination file directory', default='destination')
+parser.add_argument('-s', '--source', help='source file directory', required=True)
+parser.add_argument('-d', '--destination', help='destination file directory', required=True)
 parser.add_argument('-e', '--extensions', nargs='+', help='extensions to process', default=['mkv'])
+parser.add_argument('-p', '--publishurl', help='url where media will be published', required=True)
 args = parser.parse_args()
 
-source = Path(args.source)
-destination = Path(args.destination)
-extensions: Tuple[str, ...] = args.extensions
-state = Path('state.csv')
+MEDIA_SRC = Path(args.source)
+MEDIA_DST = Path(args.destination)
+MEDIA_EXTS: Tuple[str, ...] = tuple(args.extensions)
+PUBLISH_URL: str = args.publishurl
+STATE_FILE = Path('state.csv')
+SELF_PARENT_DIR = Path(__file__).parent
 
 class State:
-  def __init__(self, statePath: Path):
-    self.statePath = statePath
-    fields: List[str] = ['source', 'iv']
-    if not os.path.exists( str(self.statePath) ):
-      open(statePath, 'a').close()
-    self.writer = csv.DictWriter(
-      open( str(self.statePath), 'a', newline='' ),
-      fieldnames=fields)
-    if os.stat(statePath).st_size == 0:
-      self.writer.writeheader()
+  def __init__(self, stateFile: Path):
+    self.stateFile = stateFile
 
-  def get(self, source: str) -> List[Dict[str, str]]:
-    matches: List[Dict[str, str]] = []
-    reader = csv.DictReader( open( str(self.statePath) ) )
+  def get(self, src: Path) -> Optional[Dict[str, str]]:
+    reader = csv.DictReader( open( str(self.stateFile) ) )
     for row in reader:
-      if row['source'] == str(source):
-        matches.append(row)
-    return matches
+      if row['src'] == str(src):
+        return row
 
-  def write(self, source: str, iv: str):
-    print(source)
-    self.writer.writerow({'source': source, 'iv': iv})
+  def getAll(self):
+    return csv.DictReader( open( str(self.stateFile) ) )
 
-  def isValid(self, row: Dict[str, str]) -> bool:
-    if not len(row['iv']) == 32:
-      print("Failed to validate iv length", len(row['iv']))
-      return False
-    if not row['iv'].isalnum():
-      print("Failed to validate iv row alphanumerics")
-      return False
-    return True
- 
-def generateKey() -> int:
-  return secrets.randbits(128)
+  def write(self, src: Path, dst: Path, iv: str, keyFile: Path, keyInfoFile: Path):
+    f = open(self.stateFile, 'a', newline='')
+    w = csv.DictWriter(f, ['src', 'dst', 'iv', 'keyfile', 'keyinfofile'])
+    if os.stat(self.stateFile).st_size == 0:
+      w.writeheader()
+    w.writerow({'src': src, 'dst': dst, 'iv': iv, 'keyfile': keyFile, 'keyinfofile': keyInfoFile})
+    f.close()
 
-def generateInitVector() -> str:
-  return secrets.token_hex(16)
+  def create(self):
+    with open(self.stateFile, 'a', newline='') as f:
+      f.close()
 
-def generateKeyInfoFile(uri: str, key_name: str, iv: str) -> str:
-  dir = Path(__file__).parent
-  with open( Path(dir, './templates/hls_key_info_file.tmpl') ) as t:
-    return Template(t.read()).substitute(uri=uri, key_name=key_name, iv=iv)
+class KeyInfoFile:
+  def parseTemplate(self, uri: str, keyFile: str, iv: str) -> str:
+    with open( Path(SELF_PARENT_DIR, 'templates', 'hls_key_info_file.tmpl') ) as t:
+      return Template(t.read()).substitute(uri=uri, key_name=keyFile, iv=iv)
 
-def transcode(input: Path, output: Path, kif: Path):
-  print("transcode(): input: " + str(input))
-  print("transcode(): output: " + str(output))
-  if not os.path.exists(output):
-    os.makedirs(output)
-  playlistFilename = Path(str(output) + "/720p.m3u8")
-  segmentFilename = Path(str(output) + "/720p_%03d.ts")
-  if not os.path.exists(playlistFilename):
-    #command = f'ffmpeg -hwaccel auto -i "{input}" -sn -vf scale=w=1280:h=720:force_original_aspect_ratio=decrease -c:a aac -ar 48000 -b:a 128k -c:v h264 -profile:v main -crf 20 -g 192 -keyint_min 192 -sc_threshold 0 -b:v 2500k -maxrate 2675k -bufsize 3750k -hls_time 16 -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
-    command = f'ffmpeg -hwaccel auto -i "{input}" -keyint_min 192 -sc_threshold 0 -hls_time 16 -hls_key_info_file "{kif}" -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
-    os.system(command)
-    print(kif)
-  else:
-    print("transcode(): skipping because m3u8 exists")
+  def write(self, keyInfoFile: Path, content: str):
+    kf = open(keyInfoFile , "w")
+    kf.write(content)
+    return Path(kf.name)
+
+class Crypto:
+  def generateIV(self) -> str:
+    return secrets.token_hex(16)
+
+  def _generateKey(self) -> bytes:
+    return secrets.token_bytes(16)
+
+  def write(self, keyFile: Path):
+    kf = open(keyFile , 'wb')
+    kf.write(self._generateKey())
+    return Path(kf.name)
+
+  def exist(self, keyFile: Path) -> bool:
+    if Path(keyFile).is_file():
+      return True
+    return False
+
+class Media:
+  def get(self) -> List[Path]:
+    media: List[Path] = []
+    for root, dirs, files in os.walk(MEDIA_SRC, topdown=False):
+      for file in files:
+        if file.endswith(MEDIA_EXTS):
+          media.append( Path(root, file) )
+    return media
+
+  def transcode(self, src: Path, dst: Path, kif: Path):
+    playlistFilename = Path(dst, "720p.m3u8")
+    segmentFilename = Path(dst, "720p_%03d.ts")
+    if not os.path.exists(playlistFilename):
+      #command = f'ffmpeg -hwaccel auto -i "{src}" -sn -vf scale=w=1280:h=720:force_original_aspect_ratio=decrease -c:a aac -ar 48000 -b:a 128k -c:v h264 -profile:v main -crf 20 -g 192 -keyint_min 192 -sc_threshold 0 -b:v 2500k -maxrate 2675k -bufsize 3750k -hls_time 16 -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
+      command = f'ffmpeg -hwaccel auto -i "{src}" -sn -vf scale=w=1280:h=720:force_original_aspect_ratio=decrease -c:a aac -ar 48000 -b:a 128k -c:v h264 -profile:v main -pix_fmt yuv420p -keyint_min 192 -sc_threshold 0 -hls_time 16 -hls_key_info_file "{kif}" -hls_playlist_type vod -hls_segment_filename "{segmentFilename}" "{playlistFilename}"'
+      os.system(command)
+    else:
+      print("transcode(): skipping because m3u8 exists")
+
+# Instantiate classes
+keyInfoFile = KeyInfoFile() 
+crypto = Crypto()
+state = State(STATE_FILE) 
+media = Media()
 
 # Create state file
-state = State( Path('state.csv')) 
+state.create()
 
-for root, dirs, files in os.walk(source, topdown=False):
-  for file in files:
-    if file.endswith(extensions):
-      writeState: bool = False
-      stateIV: str = ""
-      outputPath: Path
-      print(f"{file}:")
+# Load media into state file
+for file in media.get():
+  if not state.get(file):
+    iv = crypto.generateIV()
+    s = file
+    d = Path(MEDIA_DST, iv)
+    kf: Path = Path(MEDIA_DST, iv, iv).with_suffix('.key')
+    kif: Path = Path(MEDIA_DST, iv, iv).with_suffix('.keyinfofile')
+    state.write(s, d, iv, kf, kif)
 
-      print("...joining source path")
-      sourcePath: Path = Path(root + '/' + file)
+# Destination directories
+for s in state.getAll():
+  Path(MEDIA_DST, s['iv']).mkdir(parents=True, exist_ok=True)
 
-      print("...getting state")
-      fileStates = state.get( str(sourcePath) )
+# Generate keys
+for s in state.getAll():
+  if not Path(s['keyfile']).is_file():
+    crypto.write(Path(s['keyfile']))
 
-      if len(fileStates) > 1:
-        print("...multiple state entries found")
-        raise RuntimeError(f"duplicate state entries found for {file}")
+# Generate key info files
+for s in state.getAll():
+  u = posixpath.join(PUBLISH_URL, s['iv'], s['iv']) + '.key'
+  kf = s['keyfile']
+  kif = s['keyinfofile']
+  iv = s['iv']
+  t = keyInfoFile.parseTemplate(u, kf, iv)
+  tfp = keyInfoFile.write(Path(kif), t)
 
-      if len(fileStates) == 0:
-        print("...no existing state")
-        writeState = True
-
-      for fileState in fileStates:
-        print("...found state record")
-
-        print("...validate state")
-        if state.isValid(fileState):
-          print("...state is valid")
-          stateIV = fileState['iv']
-        else:
-          raise RuntimeError(f"invalid state for {file}")
-
-      if writeState:
-        print("...writing state")
-        stateIV = secrets.token_hex(16)
-        state.write( str(sourcePath), stateIV )
-
-      if len(stateIV) == 32:
-        outputPath = Path(str("destination") + '/' + stateIV)
-      else:
-        raise RuntimeError("...stateIV is invalid")
-
-      dir = Path(__file__).parent
-
-      kif = generateKeyInfoFile(f'https://d3ss7civfz2zg0.cloudfront.net/media/{stateIV}/key', f'{dir}/destination/{stateIV}/key', stateIV)
-      tf = tempfile.NamedTemporaryFile()
-      tf.write(str.encode(kif))
-      tf.flush()
-
-      with open(tf.name, 'r') as testt:
-        print(testt.read())
-
-      
-      kfDir = Path(dir, outputPath)
-      kfPath = Path(dir, outputPath, 'key')
-      if Path(kfPath).is_file():
-        print("...key file exists")
-      else:
-        if not os.path.exists(kfDir):
-          print("...creating directories") # Why not do this earlier??
-          os.makedirs(kfDir)
-        print("...creating key file")
-        kf = open(kfPath , "w")
-        kf.write( str(generateKey()) )
-
-      if Path(outputPath).is_file():
-        print("...transcode exists")
-      else:
-        print(f"...transcoding source: {sourcePath}")
-        print(f"...transcoding output: {outputPath}")
-        Path(outputPath).mkdir(parents=True, exist_ok=True)
-        print("...starting transcode")
-        transcode(sourcePath, outputPath, Path(tf.name))
-
-      tf.close()
+# Transcoding
+for s in state.getAll():
+  src = Path(s['src'])
+  dst = Path(s['dst'])
+  kif = Path(s['keyinfofile'])
+  media.transcode(src, dst, kif)
