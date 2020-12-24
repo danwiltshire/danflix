@@ -1,0 +1,26 @@
+E, [2020-12-24T14:59:31.574942 #4690] ERROR -- Kitchen: ------Exception-------
+E, [2020-12-24T14:59:31.575306 #4690] ERROR -- Kitchen: Class: Kitchen::UserError
+E, [2020-12-24T14:59:31.575592 #4690] ERROR -- Kitchen: Message: Kitchen YAML file /workspaces/violet/kitchen.yml does not exist.
+E, [2020-12-24T14:59:31.575893 #4690] ERROR -- Kitchen: ----------------------
+E, [2020-12-24T14:59:31.576229 #4690] ERROR -- Kitchen: ------Backtrace-------
+E, [2020-12-24T14:59:31.576530 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/loader/yaml.rb:64:in `read'
+E, [2020-12-24T14:59:31.576876 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/config.rb:153:in `data'
+E, [2020-12-24T14:59:31.577295 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/config.rb:131:in `suites'
+E, [2020-12-24T14:59:31.577546 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/config.rb:183:in `filter_instances'
+E, [2020-12-24T14:59:31.577869 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/config.rb:142:in `build_instances'
+E, [2020-12-24T14:59:31.578168 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/config.rb:116:in `instances'
+E, [2020-12-24T14:59:31.578474 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/command.rb:109:in `filtered_instances'
+E, [2020-12-24T14:59:31.578718 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/command.rb:139:in `parse_subcommand'
+E, [2020-12-24T14:59:31.578956 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/command/list.rb:29:in `call'
+E, [2020-12-24T14:59:31.579268 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/cli.rb:52:in `perform'
+E, [2020-12-24T14:59:31.579494 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/cli.rb:120:in `list'
+E, [2020-12-24T14:59:31.579809 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/thor-1.0.1/lib/thor/command.rb:27:in `run'
+E, [2020-12-24T14:59:31.580141 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/thor-1.0.1/lib/thor/invocation.rb:127:in `invoke_command'
+E, [2020-12-24T14:59:31.580373 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/thor-1.0.1/lib/thor.rb:392:in `dispatch'
+E, [2020-12-24T14:59:31.580602 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/thor-1.0.1/lib/thor/base.rb:485:in `start'
+E, [2020-12-24T14:59:31.580767 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/bin/kitchen:11:in `block in <top (required)>'
+E, [2020-12-24T14:59:31.581108 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/lib/kitchen/errors.rb:170:in `with_friendly_errors'
+E, [2020-12-24T14:59:31.581379 #4690] ERROR -- Kitchen: /var/lib/gems/2.7.0/gems/test-kitchen-2.9.0/bin/kitchen:11:in `<top (required)>'
+E, [2020-12-24T14:59:31.581571 #4690] ERROR -- Kitchen: /usr/local/bin/kitchen:23:in `load'
+E, [2020-12-24T14:59:31.581783 #4690] ERROR -- Kitchen: /usr/local/bin/kitchen:23:in `<main>'
+E, [2020-12-24T14:59:31.581957 #4690] ERROR -- Kitchen: ----End Backtrace-----
