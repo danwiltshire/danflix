@@ -35,5 +35,5 @@ output "auth_client_id" {
 }
 
 output "auth_domain" {
-  value = var.auth0_provider_configuration[terraform.workspace]["auth0_domain"]
+  value = var.auth0_provider_configuration[var.environment]["auth0_domain"]
 }

@@ -1,21 +1,27 @@
 provider "aws" {
-  profile = terraform.workspace
+  profile = var.environment
   // Specify region because Terraform ignores region in ~/.aws/config
-  region = var.aws_provider_configuration[terraform.workspace]["region"]
+  region = var.aws_provider_configuration[var.environment]["region"]
 }
 
 provider "auth0" {
-  domain        = var.auth0_provider_configuration[terraform.workspace]["auth0_domain"]
-  client_id     = var.auth0_provider_configuration[terraform.workspace]["auth0_client_id"]
-  client_secret = var.auth0_provider_configuration[terraform.workspace]["auth0_client_secret"]
+  domain        = var.auth0_provider_configuration[var.environment]["auth0_domain"]
+  client_id     = var.auth0_provider_configuration[var.environment]["auth0_client_id"]
+  client_secret = var.auth0_provider_configuration[var.environment]["auth0_client_secret"]
 }
 
 terraform {
-  backend "s3" {}
+  backend "remote" {
+    organization = "DWLAB"
+
+    workspaces {
+      name = "violet"
+    }
+  }
 }
 
 locals {
-  resource_prefix = "${var.application_name}-${terraform.workspace}"
+  resource_prefix = "${var.application_name}-${var.environment}"
 }
 
 /**
@@ -30,11 +36,27 @@ data "aws_caller_identity" "this" {
 */
 module "private_storage_webapp" {
   source       = "./modules/private_storage"
-  storage_name = "${local.resource_prefix}-webapp"
+}
+
+resource "aws_s3_bucket_policy" "private_storage_webapp_policy" {
+  bucket = module.private_storage_webapp.id
   policy = templatefile("./modules/private_storage/templates/allow_cloudfront.json.tmpl", {
     cloudfront_oai_arn = aws_cloudfront_origin_access_identity.storage_webapp.iam_arn
-    bucket_name        = "${local.resource_prefix}-webapp"
+    bucket_name        = module.private_storage_webapp.id
   })
+}
+
+resource "aws_s3_bucket_public_access_block" "private_storage_webapp_public_access_block" {
+  bucket = module.private_storage_webapp.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  restrict_public_buckets = true
+  ignore_public_acls = true
+
+  depends_on = [
+    aws_s3_bucket_policy.private_storage_webapp_policy
+  ]
 }
 
 /**
@@ -42,11 +64,27 @@ module "private_storage_webapp" {
 */
 module "private_storage_media" {
   source       = "./modules/private_storage"
-  storage_name = "${local.resource_prefix}-media"
+}
+
+resource "aws_s3_bucket_policy" "private_storage_media_policy" {
+  bucket = module.private_storage_media.id
   policy = templatefile("./modules/private_storage/templates/allow_cloudfront.json.tmpl", {
     cloudfront_oai_arn = aws_cloudfront_origin_access_identity.storage_media.iam_arn
-    bucket_name        = "${local.resource_prefix}-media"
+    bucket_name        = module.private_storage_media.id
   })
+}
+
+resource "aws_s3_bucket_public_access_block" "private_storage_media_public_access_block" {
+  bucket = module.private_storage_media.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  restrict_public_buckets = true
+  ignore_public_acls = true
+
+  depends_on = [
+    aws_s3_bucket_policy.private_storage_media_policy
+  ]
 }
 
 /**
@@ -74,7 +112,7 @@ module "iam_role_policy_getsignedcookie" {
   role_template = file("./modules/iam_role_policy/templates/allow_lambda_assume.json")
   policy_name   = "${local.resource_prefix}-allow-getsignedcookie"
   policy_template = templatefile("./modules/iam_role_policy/templates/allow_getsignedcookie.json.tmpl", {
-    region                   = var.aws_provider_configuration[terraform.workspace]["region"]
+    region                   = var.aws_provider_configuration[var.environment]["region"]
     account_id               = data.aws_caller_identity.this.account_id
     cloudfront_access_key_id = var.cloudfront_access_key_id
     secret_value_arn         = aws_secretsmanager_secret_version.this.arn
@@ -92,7 +130,7 @@ module "function_getsignedcookie" {
   role_arn        = module.iam_role_policy_getsignedcookie.role_arn
   lambda_template = file("./modules/function/templates/getsignedcookie.js.tmpl")
   lambda_env_vars = {
-    REGION                           = var.aws_provider_configuration[terraform.workspace]["region"]
+    REGION                           = var.aws_provider_configuration[var.environment]["region"]
     SECRET_NAME                      = aws_secretsmanager_secret.this.name
     CLOUDFRONT_URL                   = "https://${aws_cloudfront_distribution.this.domain_name}"
     CLOUDFRONT_COOKIE_VALIDITY_HOURS = var.cloudfront_cookie_validity_hours
@@ -235,7 +273,7 @@ module "api_authorizer" {
   identity_sources = ["$request.header.Authorization"]
   name             = "${local.resource_prefix}-authorizer"
   jwt_audience     = [aws_apigatewayv2_api.api.api_endpoint]
-  jwt_issuer       = "https://${var.auth0_provider_configuration[terraform.workspace]["auth0_domain"]}/"
+  jwt_issuer       = "https://${var.auth0_provider_configuration[var.environment]["auth0_domain"]}/"
 }
 
 /**

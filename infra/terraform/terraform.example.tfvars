@@ -1,4 +1,4 @@
-application_name = "danflix"
+application_name = "violet"
 
 aws_provider_configuration = {
   prod = {

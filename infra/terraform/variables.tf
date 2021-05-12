@@ -29,3 +29,5 @@ variable "auth_allowed_domains" {
 variable "cloudfront_access_key_id" {}
 variable "cloudfront_private_key" {}
 variable "cloudfront_cookie_validity_hours" {}
+
+variable "environment" {}

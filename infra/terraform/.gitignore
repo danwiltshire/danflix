@@ -16,6 +16,7 @@ crash.log
 #
 terraform.tfvars
 terraform.test.tfvars
+terraform.auto.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in

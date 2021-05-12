@@ -9,8 +9,8 @@ ARG INSTALL_NODE="true"
 ARG NODE_VERSION="lts/*"
 RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "source /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
 
-RUN wget -P /tmp/ https://releases.hashicorp.com/terraform/0.14.3/terraform_0.14.3_linux_amd64.zip \
-    && unzip /tmp/terraform_0.14.3_linux_amd64.zip -d /tmp/ \
+RUN wget -P /tmp/ https://releases.hashicorp.com/terraform/0.15.3/terraform_0.15.3_linux_amd64.zip \
+    && unzip /tmp/terraform_0.15.3_linux_amd64.zip -d /tmp/ \
     && mv /tmp/terraform /usr/bin/
 
 # [Optional] Uncomment this section to install additional OS packages.
