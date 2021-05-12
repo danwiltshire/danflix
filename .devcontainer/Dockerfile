@@ -1,13 +1,8 @@
-# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.154.0/containers/ruby/.devcontainer/base.Dockerfile
+# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.163.1/containers/javascript-node/.devcontainer/base.Dockerfile
 
-# [Choice] Ruby version: 2, 2.7, 2.6, 2.5
-ARG VARIANT="2"
-FROM mcr.microsoft.com/vscode/devcontainers/ruby:0-${VARIANT}
-
-# [Option] Install Node.js
-ARG INSTALL_NODE="true"
-ARG NODE_VERSION="lts/*"
-RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "source /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
+# [Choice] Node.js version: 14, 12, 10
+ARG VARIANT="14-buster"
+FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
 
 RUN wget -P /tmp/ https://releases.hashicorp.com/terraform/0.15.3/terraform_0.15.3_linux_amd64.zip \
     && unzip /tmp/terraform_0.15.3_linux_amd64.zip -d /tmp/ \
@@ -17,9 +12,22 @@ RUN wget -P /tmp/ https://releases.hashicorp.com/terraform/0.15.3/terraform_0.15
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
 
-# [Optional] Uncomment this line to install additional gems.
-#RUN gem install test-kitchen -v 2.9.0
-#RUN gem install kitchen-terraform -v 5.6.0
+RUN apt-get update && \
+    apt-get install -y \
+        --no-install-recommends \
+        python3 \
+        python3-pip \
+        python3-setuptools \
+        groff \
+        less \
+    && pip3 install --upgrade pip \
+    && apt-get clean
 
-# [Optional] Uncomment this line to install global node packages.
-# RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
+RUN pip3 --no-cache-dir install --upgrade awscli
+
+# [Optional] Uncomment if you want to install an additional version of node using nvm
+# ARG EXTRA_NODE_VERSION=10
+# RUN su node -c "source /usr/local/share/nvm/nvm.sh && nvm install ${EXTRA_NODE_VERSION}"
+
+# [Optional] Uncomment if you want to install more global node modules
+# RUN su node -c "npm install -g <your-package-list-here>"
