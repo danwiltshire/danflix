@@ -33,8 +33,6 @@ function log_usage() {
   echo "  aws_secret_access_key=abcABCabcABCabcABCabcABCabcABCabcABCabcABC"
 }
 
-log_usage && exit 1
-
 echo "[INFO] Chosen environment is $ENVIRONMENT. This value should be reflected as a profile in your ~/.aws/config file"
 
 # Validate critical variables are set
