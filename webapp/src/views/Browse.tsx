@@ -32,7 +32,7 @@ export const Browse: React.FC = () => {
       try {
         const accessToken = await getAccessTokenSilently()
 
-        const response = await fetch(`https://d3ss7civfz2zg0.cloudfront.net/api/listbucket`, {
+        const response = await fetch(`https://${localStorage.getItem('REACT_APP_CLOUDFRONT_DISTRIBUTION_DOMAIN_NAME')}/api/listbucket`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

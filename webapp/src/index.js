@@ -4,22 +4,48 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Auth0Provider } from '@auth0/auth0-react';
+import { FirstRun } from './views/FirstRun'
 
-const domain = process.env.REACT_APP_AUTH0_DOMAIN;
-const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
-const audience = process.env.REACT_APP_AUTH0_AUDIENCE;
-const useRefreshTokens = process.env.REACT_APP_AUTH0_USE_REFRESH_TOKENS;
+const domain = localStorage.getItem('REACT_APP_AUTH0_DOMAIN');
+const clientId = localStorage.getItem('REACT_APP_AUTH0_CLIENT_ID');
+const audience = localStorage.getItem('REACT_APP_AUTH0_AUDIENCE');
+const useRefreshTokens = true;
+
+window.addEventListener("gamepadconnected", (event) => {
+  console.log("A gamepad connected:");
+  console.log(event.gamepad);
+});
+
+window.addEventListener("gamepaddisconnected", (event) => {
+  console.log("A gamepad disconnected:");
+  console.log(event.gamepad);
+});
+
+var gamepads = navigator.getGamepads();
+console.log(gamepads);
+
+
+let requiresSetup = false
+if ( ! localStorage.getItem('REACT_APP_AUTH0_DOMAIN') ) requiresSetup = true
+if ( ! localStorage.getItem('REACT_APP_AUTH0_CLIENT_ID') ) requiresSetup = true
+if ( ! localStorage.getItem('REACT_APP_AUTH0_AUDIENCE') ) requiresSetup = true
+if ( ! localStorage.getItem('REACT_APP_CLOUDFRONT_DISTRIBUTION_DOMAIN_NAME') ) requiresSetup = true
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <Auth0Provider
-    domain={domain}
-    clientId={clientId}
-    redirectUri={window.location.origin}
-    audience={audience}
-    useRefreshTokens={useRefreshTokens}>
-      <App />
-    </Auth0Provider>
+    { requiresSetup ?
+      <FirstRun />
+    :
+      <Auth0Provider
+        domain={domain}
+        clientId={clientId}
+        redirectUri={window.location.origin}
+        audience={audience}
+        useRefreshTokens={useRefreshTokens}>
+          <App />
+      </Auth0Provider>
+    }
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -36,7 +36,7 @@ export const Player: React.FC = () => {
       try {
         const accessToken = await getAccessTokenSilently()
 
-        await fetch(`https://d3ss7civfz2zg0.cloudfront.net/api/signedcookie`, {
+        await fetch(`https://${localStorage.getItem('REACT_APP_CLOUDFRONT_DISTRIBUTION_DOMAIN_NAME')}/api/signedcookie`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -61,7 +61,7 @@ export const Player: React.FC = () => {
     autoplay: true,
     controls: true,
     sources: [{
-      src: `https://d3ss7civfz2zg0.cloudfront.net/${state.bucketKey}`,
+      src: `https://${localStorage.getItem('REACT_APP_CLOUDFRONT_DISTRIBUTION_DOMAIN_NAME')}/${state.bucketKey}`,
       type: 'application/x-mpegURL',
       withCredentials: true
     }],

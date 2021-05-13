@@ -9,12 +9,14 @@ import { Loading } from './views/Loading'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Notice } from './views/Notice'
 import { Player } from './views/Player'
+import { PrivacyPolicy } from './views/PrivacyPolicy'
+import { FirstRun } from './views/FirstRun'
 
 export const App: React.FC = () => {
 
   const { isLoading, error } = useAuth0();
 
-  if ( isLoading ) { return <Loading />  }
+  if ( isLoading ) return <Loading />
 
   if ( error ) {
     return <BrowserRouter>
@@ -35,6 +37,8 @@ export const App: React.FC = () => {
         <Route path="/loading" component={Loading} />
         <Route path="/notice" component={Notice} />
         <Route path="/player" component={Player} />
+        <Route path="/privacy-policy" component={PrivacyPolicy} />
+        <Route path="/first-run" component={FirstRun} />
         <Route path="/" render={() => <Holding
             heading={"404 Not Found"}
             subheading={"Violet can't find that."}

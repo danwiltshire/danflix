@@ -9,8 +9,6 @@ interface VideoPlayerProps {
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({videoJsOptions}) => {
 
   const playerRef = useRef() as React.MutableRefObject<HTMLVideoElement>
-  //const [ props ] = useState<PlayerProps>()
-  //let { player, videoNode } = useState(VideoJsPlayer);
 
   useEffect(() => {
     const player = videojs(playerRef.current, videoJsOptions, function onPlayerReady() {

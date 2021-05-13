@@ -6,8 +6,8 @@
 
 shopt -s globstar
 
-inputfolder="./media/source"
-outputfolder="./media/converted"
+inputfolder="$1"
+outputfolder="$2"
 dryrun=false
 
 for v in $inputfolder/**/*.{avi,mkv,mp4}; do

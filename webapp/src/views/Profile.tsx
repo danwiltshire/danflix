@@ -17,8 +17,6 @@ export const Profile: React.FC<ProfileProps> = () => {
     logout,
     user
   } = useAuth0();
-
-
   
   if ( isAuthenticated ) {
 

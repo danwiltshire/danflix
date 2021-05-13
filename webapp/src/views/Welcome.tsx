@@ -17,13 +17,13 @@ export const Welcome: React.FC<WelcomeProps> = () => {
 
   return (
     <div>
-      <Header profileIcon />
+      <Header profileIcon distribution />
       <main>
         <Logo width='auto' height='56px' />
         <h1>Welcome to Violet</h1>
         <span className="subheading">Your media, serverless.</span>
         { isAuthenticated && <button onClick={() => { history.push('/browse') } }>Browse</button> }
-        { ! isAuthenticated && <button onClick={loginWithRedirect}>Log in</button> }
+        { ! isAuthenticated && <button tabIndex={1} onClick={loginWithRedirect}>Log in</button> }
       </main>
       <Footer about />
     </div>

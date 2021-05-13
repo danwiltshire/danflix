@@ -411,14 +411,14 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
   origin {
-    domain_name = module.private_storage_webapp.bucket_regional_domain_name
+    domain_name = module.private_storage_webapp.bucket_domain_name
     origin_id   = module.private_storage_webapp.id
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.storage_webapp.cloudfront_access_identity_path
     }
   }
   origin {
-    domain_name = module.private_storage_media.bucket_regional_domain_name
+    domain_name = module.private_storage_media.bucket_domain_name
     origin_id   = module.private_storage_media.id
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.storage_media.cloudfront_access_identity_path
